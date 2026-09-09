@@ -113,12 +113,23 @@ def check_video_metadata(path: Path, ffprobe: str) -> list[str]:
         issues.append("must contain exactly one video stream, with no audio or data/timecode tracks")
     if probe.get("chapters"):
         issues.append("contains chapter metadata")
-    if set(probe.get("format", {}).get("tags", {})) - {"major_brand", "minor_version", "compatible_brands"}:
-        issues.append("contains descriptive container metadata")
+    unexpected_container_tags = set(probe.get("format", {}).get("tags", {})) - {
+        "major_brand",
+        "minor_version",
+        "compatible_brands",
+    }
+    if unexpected_container_tags:
+        issues.append("contains descriptive container metadata: " + ", ".join(sorted(unexpected_container_tags)))
     for stream in streams:
         tags = stream.get("tags", {})
-        if set(tags) - {"language", "handler_name"}:
-            issues.append("contains descriptive stream metadata")
+        unexpected_stream_tags = set(tags) - {"language", "handler_name"}
+        # FFmpeg 6 exposes the empty MP4 sample-entry vendor field as this
+        # literal zero marker. Newer ffprobe versions omit it. Accept only
+        # that neutral value; custom vendor IDs remain identifying metadata.
+        if tags.get("vendor_id") == "[0][0][0][0]":
+            unexpected_stream_tags.discard("vendor_id")
+        if unexpected_stream_tags:
+            issues.append("contains descriptive stream metadata: " + ", ".join(sorted(unexpected_stream_tags)))
         if tags.get("language", "und") != "und" or tags.get("handler_name", "VideoHandler") != "VideoHandler":
             issues.append("contains a non-generic stream label")
     return issues
