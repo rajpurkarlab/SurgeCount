@@ -172,9 +172,9 @@ def _replace_vector_column(table, name, values, dtype):
 def add_stop_signal(source, destination, last_n=10, canonicalize_tasks=False):
     """Make a complete new v3 tree with action13 and refreshed action statistics.
 
-    Existing action13 must already have correct binary stop labels; it is checked
-    rather than silently replaced. A failed write leaves an explicit INCOMPLETE
-    marker in the new destination, never a partially changed source dataset.
+    Existing action13 labels are validated against the requested stop rule.
+    A failed write leaves an INCOMPLETE marker in the new destination.
+    Source recordings remain read-only throughout conversion.
     """
     np, pa, pq = _deps()
     source, destination = Path(source).resolve(), Path(destination).resolve()

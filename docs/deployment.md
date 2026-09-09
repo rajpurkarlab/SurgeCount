@@ -5,8 +5,8 @@ configuration targets a single-camera skill policy and uses a generic local
 checkpoint placeholder. Supply a local checkpoint containing `config.json`,
 `model.safetensors`, and the saved policy pre/postprocessor JSON and
 normalization state files. Provision the tokenizer cache in the target
-environment separately. Real deployment sets the Hugging Face libraries
-to offline mode and does not download model artifacts.
+environment separately. Deployment loads model artifacts locally with the
+Hugging Face libraries in offline mode.
 
 ```bash
 surgecount-deploy --config configs/deploy.json --hardware configs/robot.example.json --dry-run
@@ -15,13 +15,13 @@ surgecount-deploy --config configs/deploy.json --hardware /path/to/robot.json --
 ```
 
 Both check modes leave hardware disconnected. `--check` validates local
-calibration/home files and checkpoint metadata, including the `pi05` loader type, thirteen
-action dimensions, and camera keys. It does not instantiate the large
-policy or establish that inference will meet its timing target.
+calibration/home files and checkpoint metadata, including the `pi05` loader
+type, thirteen action dimensions, and camera keys. Model loading and
+inference timing require a separate run in the deployment environment.
 
 The default mode is manual skill selection. For automated selection,
 install the `planner` extra, export `GEMINI_API_KEY` in the environment,
-and add `--mode gemini`. No `.env` file is automatically loaded. The
+and add `--mode gemini`. The key is read from the process environment. The
 planner sends the three camera views and skill history to the configured
 Gemini service; this is enabled only in Gemini mode. The supplied model
 identifier records the workstation launcher setting and can be changed in
@@ -62,8 +62,8 @@ space as the current action before comparison. This differs from the
 older manual launcher, which required ten consecutive executed stop
 predictions: to reproduce that rule, use `stop_mode: consecutive`,
 `stop_window: 10`, disable `dynamic_chunk.enabled`, and choose an
-interpolation multiplier of 1. This changes the stop rule; it does not
-establish that an earlier experimental run used the rest of this config.
+interpolation multiplier of 1. These settings specify the older stop rule;
+the remaining fields retain the current deployment defaults.
 
 On completion the controller holds position. Gemini then selects a new
 skill or waits; manual mode waits for the operator. Slot occupancy updates
@@ -71,8 +71,8 @@ only when release finishes immediately after a slot-placement skill.
 Timeout handling holds for inspection and can use the externally supplied
 home pose for right-arm recovery. Enter saves an episode, Escape ends the
 session, `e` pauses, and the digit/slot keys select skills. Physical motor
-updates may be slower than nominal rates because of inference, camera,
-or planner latency; no real-time guarantee is implied.
+update rates depend on inference, camera, and planner latency. Measure
+effective rates on the target hardware.
 Keyboard input received during a planner request invalidates that response.
 Pending suggestions are cleared by pause or exit, and the planner waits
 while the operator selects a slot after pressing `2`.
@@ -80,5 +80,4 @@ while the operator selects a slot after pressing `2`.
 The vendored runtime is an integration of the preserved workstation
 sources with the recorded local LeRobot baseline. Offline tests exercise
 configuration validation and compatibility fixes. Robot motion, GPU
-throughput, and live Gemini behavior require validation on the actual
-setup before using a run as experimental evidence.
+throughput, and live Gemini behavior require validation on the actual setup.

@@ -2,9 +2,8 @@
 
 Use Python 3.12 and the vendored LeRobot source. Run `uv sync --frozen
 --no-editable --python 3.12 --extra data --extra dev` for data/configuration
-work, or add the `train`, `robot`, and
-`planner` extras for those components. Do not install an unmodified PyPI
-LeRobot over the vendored package.
+work, or add the `train`, `robot`, and `planner` extras for those components.
+Keep the patched, vendored LeRobot package as the installed dependency.
 
 ```bash
 uv run --no-sync pytest
@@ -26,5 +25,4 @@ metadata out of contributions. See [anonymous release notes](docs/anonymity.md).
 
 When modifying the vendor package, retain original license notices and
 document the change in `docs/provenance.md`. For robot changes, record the
-offline tests performed and separately report physical validation; passing
-configuration tests does not establish hardware behavior.
+offline tests performed and physical validation as separate results.

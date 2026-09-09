@@ -16,13 +16,13 @@
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Anonymous submission · ML4H 2026">
   <meta property="og:title" content="SurgeCount: A Protocol-Guided Composition Harness for Bimanual Surgical Sponge Counting">
-  <meta property="og:description" content="A composition harness that turns failing end-to-end policies into a working protocol-constrained surgical gauze-counting system.">
+  <meta property="og:description" content="A composition harness that combines learned skills, stop boundaries, visual verification, and recovery for bimanual surgical gauze counting.">
   <meta property="og:image" content="static/images/architecture.png">
   <meta property="og:image:alt" content="SurgeCount system overview">
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="SurgeCount: A Protocol-Guided Composition Harness for Bimanual Surgical Sponge Counting">
-  <meta name="twitter:description" content="A composition harness that turns failing end-to-end policies into a working protocol-constrained surgical gauze-counting system.">
+  <meta name="twitter:description" content="A composition harness that combines learned skills, stop boundaries, visual verification, and recovery for bimanual surgical gauze counting.">
   <meta name="twitter:image" content="static/images/architecture.png">
 
   <meta name="citation_title" content="SurgeCount: A Protocol-Guided Composition Harness for Bimanual Surgical Sponge Counting">
@@ -102,7 +102,7 @@
           </div>
         </div>
         <h2 class="subtitle has-text-centered">
-          <b>Two full procedures, end-to-end.</b> In each run, SurgeCount counts three gauzes into the ordered tray, grasping each by its blue radiopaque thread, verifying every placement, and recovering from failed grasps &mdash; all from subtask-tagged teleoperation and a hand-written protocol prompt.
+          <b>Two full procedures, end-to-end.</b> In each run, SurgeCount counts three gauzes into the ordered tray, grasps each by its blue radiopaque thread, verifies placements, and recovers from failed grasps. The system combines subtask-tagged teleoperation with a hand-written protocol prompt.
         </h2>
       </div>
     </div>
@@ -115,13 +115,13 @@
           <h2 class="title is-3">Abstract</h2>
           <div class="content has-text-justified">
             <p>
-              Surgical sponges are the most common retained foreign object in operating rooms, prevented today by intraoperative counting protocols that combine bimanual handling, ordered placement, and per-step verification. Autonomous gauze counting is a representative real-robot instance of <b>protocol-constrained long-horizon manipulation</b> &mdash; a problem class with deformable objects, occluded grasp landmarks, ordered subtasks, and per-step verification gates that no current benchmark captures together and that simulators abstract away.
+              Intraoperative sponge counting combines bimanual handling, ordered placement, and per-step verification. Autonomous gauze counting brings these requirements to <b>protocol-constrained long-horizon manipulation</b> with deformable objects, occluded grasp landmarks, ordered subtasks, and visual verification gates.
             </p>
             <p>
-              Across 100 paired-layout real-robot trials (five methods, 20 matched layouts each), four state-of-the-art end-to-end policies trained on the same teleoperation demonstrations cap at 27 of 60 slots filled and 3 of 20 procedures completed. <b>The bottleneck is composition under protocol constraints, not visuomotor capacity.</b> We introduce <b>SurgeCount</b>, a composition harness over a language-conditioned policy with twelve robot actions and a learned stop signal. A stateful vision-language model selects the next subtask at each stopping boundary under a prompt-encoded protocol with per-skill verification gates, and recovery composes from release-and-return subtasks already present in the training set.
+              Across 100 paired-layout real-robot trials (five methods, 20 matched layouts each), the strongest of four end-to-end baselines trained on the same teleoperation demonstrations fills 27 of 60 slots and completes 3 of 20 procedures. We introduce <b>SurgeCount</b>, a composition harness over a language-conditioned policy with twelve robot actions and a learned stop signal. A stateful vision-language model selects the next subtask at each stopping boundary under a prompt-encoded protocol with per-skill verification gates, and recovery composes from release-and-return subtasks in the training set.
             </p>
             <p>
-              SurgeCount fills <b>47 of 60</b> slots and completes <b>12 of 20</b> procedures, significantly better than the strongest baseline, while adding only operator-entered subtask tags and a hand-written protocol prompt to the shared teleoperation demonstrations. These results identify a practical recipe for protocolized long-horizon manipulation: compose subtask-tagged teleoperation with explicit procedural rules, learned stopping, and visual verification gates.
+              SurgeCount fills <b>47 of 60</b> slots and completes <b>12 of 20</b> procedures, significantly better than the strongest baseline. It adds operator-entered subtask tags and a hand-written protocol prompt to the shared teleoperation demonstrations. These results show how skill composition, learned stopping, and visual verification improve protocol-constrained procedure completion.
             </p>
           </div>
         </div>
@@ -131,7 +131,7 @@
 
   <section class="section">
     <div class="container is-max-desktop section-narrow">
-      <h2 class="title is-3 has-text-centered">Composition, not capacity, is the bottleneck</h2>
+      <h2 class="title is-3 has-text-centered">Skill composition improves procedure completion</h2>
       <div class="columns is-centered has-text-centered" style="margin-top:1rem;">
         <div class="column">
           <div class="stat-number base">27 / 60</div>
@@ -151,7 +151,7 @@
         </div>
       </div>
       <p class="has-text-centered content" style="margin-top:1rem;">
-        Trained on the same teleoperation data, end-to-end policies handle individual skills but cannot chain them under protocol. Our end-to-end &pi;<sub>0.5</sub> baseline is implemented from &pi;<sub>0</sub> with a trained subtask predictor, following the original &pi;<sub>0.5</sub> paper (arXiv:2504.16054). At each action chunk boundary, the overhead image and an umbrella instruction produce subtask text that conditions twelve-dimensional action generation. This baseline has no stop signal and switches its active subtask mid-rollout 18.2 times per trial on average, against 0 for SurgeCount by construction.
+        Our end-to-end &pi;<sub>0.5</sub> baseline is implemented from &pi;<sub>0</sub> with a trained subtask predictor, following the original &pi;<sub>0.5</sub> paper (arXiv:2504.16054). At each action chunk boundary, the overhead image and an umbrella instruction produce subtask text that conditions twelve-dimensional action generation. This baseline has no stop signal and switches its active subtask mid-rollout 18.2 times per trial on average. SurgeCount maintains the selected subtask until a stopping boundary, yielding 0 mid-rollout switches by construction.
       </p>
     </div>
   </section>
@@ -187,7 +187,7 @@
           <div class="box mechanism-card has-text-centered">
             <span class="icon is-large has-text-info"><span class="mechanism-symbol" aria-hidden="true">↶</span></span>
             <h3 class="title is-5">3. Composed recovery</h3>
-            <p>On a gate failure, recovery composes from release-and-return subtasks already in the training set &mdash; using the existing skill library without a dedicated recovery policy.</p>
+            <p>On a gate failure, the harness composes release-and-return subtasks from the learned skill library, then reassesses visibility and selects the next attempt.</p>
           </div>
         </div>
       </div>
@@ -198,7 +198,7 @@
     <div class="container is-max-desktop">
       <h2 class="title is-3 has-text-centered">Two grasp strategies</h2>
       <p class="content has-text-centered section-narrow">
-        Each gauze carries one blue radiopaque thread &mdash; the only reliable per-sponge isolation landmark. The orchestrator routes between two named happy-path strategies depending on whether that thread is visible.
+        Each gauze carries one blue radiopaque thread that serves as the grasp landmark for isolating an individual sponge. The orchestrator selects one of two grasp strategies according to thread visibility.
       </p>
       <div class="columns is-centered">
         <div class="column is-half">
@@ -225,7 +225,7 @@
     <div class="container is-max-desktop">
       <h2 class="title is-3 has-text-centered">Failure &amp; recovery</h2>
       <p class="content has-text-centered section-narrow">
-        The harness does not make grasping easy &mdash; it makes failed grasps <b>recoverable and auditable</b>. A failure is caught at a verification gate, the arm releases and returns to baseline, and the procedure retries from a fresh visibility assessment rather than propagating the error into the next placement. Below are three distinct recovery cases.
+        Verification gates connect failed grasps to explicit recovery actions. The arm releases the gauze and returns to its starting pose, then the orchestrator reassesses visibility and selects a retry. The three cases below show these decisions and their outcomes.
       </p>
       <div class="columns is-centered">
         <div class="column is-one-third">
@@ -233,7 +233,7 @@
             <source src="static/videos/recovery_case1.mp4" type="video/mp4">
           </video>
           <p class="video-caption has-text-centered">
-            <b>Recovery case 1: protocol violation.</b> The orchestrator detects a non-compliant grasp (gripper closed on the white gauze body, not the blue thread), so it drops and retries &mdash; keeping the count safe and clean.
+            <b>Recovery case 1: protocol violation.</b> The orchestrator detects a grasp on the white gauze body, releases the gauze, and retries the required blue-thread grasp.
           </p>
         </div>
         <div class="column is-one-third">
@@ -241,7 +241,7 @@
             <source src="static/videos/recovery_case2.mp4" type="video/mp4">
           </video>
           <p class="video-caption has-text-centered">
-            <b>Recovery case 2: thread not exposed.</b> After the right-arm grasp, the orchestrator sees the blue thread is still hidden, so the right arm drops the gauze and retries &mdash; iterating until the thread is exposed for the second arm to grab.
+            <b>Recovery case 2: occluded thread.</b> After the right-arm grasp, the orchestrator sees that the blue thread remains hidden. The right arm releases the gauze and retries thread exposure for the second arm.
           </p>
         </div>
         <div class="column is-one-third">
@@ -249,7 +249,7 @@
             <source src="static/videos/recovery_case3.mp4" type="video/mp4">
           </video>
           <p class="video-caption has-text-centered">
-            <b>Recovery case 3: strategy switch after a failed grasp.</b> The orchestrator runs the occluded-thread strategy and attempts the exposed-thread grasp (an inherently difficult skill). The grasp fails, but dropping the gauze leaves the blue thread visible &mdash; the orchestrator detects this and switches to the visible-thread strategy, which succeeds.
+            <b>Recovery case 3: strategy switch after a failed grasp.</b> The exposed-thread grasp fails during the occluded-thread strategy. Releasing the gauze leaves the blue thread visible, and the orchestrator switches to the visible-thread strategy, which succeeds in this trial.
           </p>
         </div>
       </div>
@@ -260,13 +260,13 @@
     <div class="container is-max-desktop section-narrow">
       <h2 class="title is-3 has-text-centered">A typical end-to-end failure</h2>
       <p class="content has-text-centered">
-        Trained on the same demonstrations as SurgeCount, the end-to-end &pi;<sub>0.5</sub> baseline uses its trained &pi;<sub>0</sub>-based subtask predictor at each action chunk boundary. The predicted text conditions twelve robot actions; the baseline has no learned stop signal or procedural verification gate.
+        Trained on the same demonstrations as SurgeCount, the end-to-end &pi;<sub>0.5</sub> baseline uses its trained &pi;<sub>0</sub>-based subtask predictor at each action chunk boundary. Here, it misses the exposed-thread grasp and the procedure stalls.
       </p>
       <video poster="static/images/posters/pi05_failure_mode.jpg" controls muted loop playsinline preload="metadata" style="width:100%; border-radius:8px;">
         <source src="static/videos/pi05_failure_mode.mp4" type="video/mp4">
       </video>
       <p class="video-caption has-text-centered">
-        <b>End-to-end &pi;<sub>0.5</sub>: a failed exposed-thread grasp goes undetected.</b> After the left-arm reveal, &pi;<sub>0.5</sub> attempts the exposed-thread grasp and misses; with no verification gate, it does not register the failure and cannot recover &mdash; the procedure stalls.
+        <b>End-to-end &pi;<sub>0.5</sub>: a missed exposed-thread grasp.</b> After the left-arm reveal, the baseline attempts the exposed-thread grasp and misses. The procedure stalls at this failed grasp.
       </p>
     </div>
   </section>
@@ -307,7 +307,7 @@
         </tbody>
       </table>
       <p class="content has-text-centered" style="font-size:0.9rem;">
-        Thread grasps are the rate-limiting operation; every downstream skill (placement, release-and-return) succeeds on 100% of attempts once the thread is isolated. Failed grasps are caught at boundaries and retried, not propagated.
+        Thread grasps have the lowest acceptance rates. In these trials, placement and release-and-return each succeed on 100% of attempts. Verification gates trigger retries after failed grasps.
       </p>
     </div>
   </section>

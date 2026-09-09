@@ -41,8 +41,8 @@ class TrainingConfig:
     gradient_checkpointing: bool = True
     device: str = "cuda"
     stop_last_n_frames: int = 10
-    # These are explicit release defaults based on the vendored PI05 preset.
-    # They are not asserted to be the deleted historical launch configuration.
+    # Release defaults follow the vendored PI05 preset.
+    # Historical configuration availability is documented in docs/provenance.md.
     chunk_size: int = 50
     optimizer_lr: float = 2.5e-5
     optimizer_weight_decay: float = 0.01
@@ -78,7 +78,7 @@ class TrainingConfig:
             if not self.dataset_root:
                 raise ValueError(
                     f"{ARTIFACT_AVAILABILITY} Supply --dataset-root for a prepared local dataset; "
-                    "local/* dataset identities are never remote repository defaults."
+                    "local/* dataset identifiers require a local root."
                 )
             root = Path(self.dataset_root)
             missing = [
@@ -114,14 +114,13 @@ def load_config(path=None, **overrides):
 def resolve_initialization(value):
     """Validate an explicit initialization choice without importing ML or Hub code.
 
-    Ordinary strings are local directories. Only an explicit hf:// URI opts into
-    a remote repository, so a missing relative path never becomes a Hub request.
-    A checkpoint's policy type establishes adapter compatibility, not its origin.
+    Ordinary strings name local directories; an explicit hf:// URI selects a
+    remote repository. The saved policy type selects the compatible adapter.
     """
     if not isinstance(value, str) or not value.strip():
         raise ValueError(
             "An explicit initialization checkpoint is required. Supply --base-model with a local "
-            "checkpoint directory or an intentional hf:// Hub URI; initialization is not inferred."
+            "checkpoint directory or an intentional hf:// Hub URI."
         )
     if value.startswith("hf://"):
         repository = value.removeprefix("hf://")
@@ -154,7 +153,7 @@ def resolve_initialization(value):
 
 
 def eligible_row_indices(episode_indices, task_indices, min_episode_index=251, max_episode_index=None):
-    """Return dataset *positions*, not global `index` or episode metadata offsets."""
+    """Return row positions within the supplied dataset columns."""
     import numpy as np
 
     episodes, tasks = np.asarray(episode_indices), np.asarray(task_indices)
@@ -247,7 +246,7 @@ class TaskFilteredDataset:
 
 
 def validate_dataset_metadata(metadata):
-    """Reject incompatible data before downloading a multi-gigabyte base model."""
+    """Validate feature dimensions, task labels, stop targets, and normalization."""
     import numpy as np
 
     features, stats = metadata.features, metadata.stats or {}
@@ -306,8 +305,8 @@ def recipe_summary(config):
         "artifact_availability": ARTIFACT_AVAILABILITY,
         "release_assumptions": [
             "After 250 is implemented as episode_index >= 251; change min_episode_index if curation used ordinal numbering.",
-            "10000 updates is the release training schedule; historical checkpoint artifacts are not bundled.",
-            "Optimizer, scheduler, chunk size and worker defaults come from the vendored code, not a recovered historical run.",
+            "The release defaults to a 10000-update training schedule.",
+            "Optimizer, scheduler, chunk size and worker defaults follow the vendored preset.",
             "Filtering excludes sampled anchors; native action chunks can extend across task boundaries.",
         ],
     }
@@ -335,8 +334,8 @@ def training_hooks(train_module, release_config):
         return filtered
 
     def make_processors(policy_cfg, pretrained_path=None, **kwargs):
-        # Base model weights are retained, but its processors may describe another
-        # action width or relative actions. Fresh processors use action13 stats.
+        # Fresh processors use this dataset's action13 statistics and absolute
+        # action convention alongside the loaded checkpoint weights.
         return original_processors(
             policy_cfg=policy_cfg,
             pretrained_path=None,

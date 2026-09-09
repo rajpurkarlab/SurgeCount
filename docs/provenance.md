@@ -1,58 +1,57 @@
-# Source provenance and scope
+# Source provenance
 
-This release was assembled from the preserved robot-side LeRobot source,
-the separate inference-workstation source bundle, and the existing static
-project website. Historical memory and surviving operator prompts were
-used to interpret the code, not copied into the public repository.
+This release combines the preserved robot-side LeRobot source, the
+inference-workstation source bundle, and the static project website.
+Historical memory and surviving operator prompts informed interpretation of
+the code and recipe reconstruction. Those records remain private.
 
-The LeRobot snapshot reports version 0.5.2 and includes local research
-modifications. Private source history and commit identifiers are withheld
-for anonymous review; the vendored files define this release's source tree.
-The newer workstation recorder, control utilities, Gemini planner, and
-Linux keyboard support were integrated into that snapshot. See
-`vendor/lerobot/SURGECOUNT_CHANGES.md` for the changed components and
+The vendored LeRobot 0.5.2 snapshot includes research modifications and the
+newer workstation recorder, control utilities, Gemini planner, and Linux
+keyboard support. The vendored files define the distributed source tree;
+private source history and commit identifiers are withheld for anonymous
+review. See `vendor/lerobot/SURGECOUNT_CHANGES.md` for the changed components and
 compatibility fixes. Upstream copyright and license notices are retained.
 
-The release adds standalone configuration-driven commands, fresh-copy
-dataset preparation, robust dataset-position filtering, camera masking,
-failure checks for pretrained loading, and offline regression tests.
-The old experimental shell launcher collection is not the public interface.
-Model weights, calibration, home poses, device serials, private machine
-paths, API keys, original chat histories, and raw datasets are excluded.
+The public interface consists of standalone configuration-driven commands
+for collection, dataset preparation, training, and deployment. The release
+adds dataset preparation in new copies, filtering by local row position, camera masking,
+strict initialization loading, and offline regression tests. Model weights,
+raw datasets, calibration, home poses, device identities, machine paths,
+API keys, and original chat histories remain outside the anonymous package.
 
 ## Experimental interpretation
 
-The confirmed final SurgeCount recipe uses a language-conditioned policy,
-the curated demonstrations after episode 250, 13-dimensional actions, idle/drop anchor
-filtering, single-camera masking, full finetuning, and batch 192. The
-recovered workstation launcher defaults to step 9,000 and a five-prediction
-lookahead stop window. The earlier manual launcher used a ten-control-step
-debounce. Both stop rules are documented and selectable; their settings
-are not conflated.
+The confirmed SurgeCount recipe uses curated demonstrations after episode
+250, a language-conditioned policy, 13-dimensional actions, idle/drop anchor
+filtering, single-camera masking, full finetuning, and batch 192. Two
+selectable runtime profiles preserve the recorded stop rules: the workstation
+launcher uses step 9,000 with a five-prediction lookahead window; the earlier
+manual launcher uses a ten-control-step debounce.
 
-The recovered end-to-end pi0.5 baseline is implemented from pi0 with a trained
+The end-to-end pi0.5 baseline is implemented from pi0 with a trained
 subtask predictor, following the original pi0.5 paper (arXiv:2504.16054).
 The overhead image and umbrella instruction feed the predictor at each action
 chunk boundary; its subtask text then conditions twelve-dimensional action
-generation. This baseline has no stop signal. SurgeCount uses the separate
-thirteen-dimensional skill policy and operator/Gemini composition harness.
-The baseline predictor-training branch and exact objective remain pending
-source recovery.
+generation without a stop signal.
+SurgeCount uses the thirteen-dimensional skill policy and operator/Gemini
+composition harness. The baseline predictor-training branch and exact objective
+remain to be recovered.
 
 The release trainer retains LeRobot's `pi05` checkpoint interface. Its
 initialization checkpoint is supplied explicitly with `--base-model`;
 the example configuration leaves `base_model` unset.
 
-The manuscript is maintained separately. Its policy labels, dataset
-counts, and stop description are not treated as a replacement for the
-confirmed code recipe. This release does not reconstruct evaluation labels,
-per-trial outcome tables, historical base/dataset revision hashes, or an
-exact deleted training launch. Those artifacts were not supplied.
+The manuscript is maintained separately. Runtime settings here follow the
+confirmed code recipe. `configs/train.json` identifies reconstruction
+defaults; [training.md](training.md) explains their selection. Exact
+experimental reproduction also requires the original final training launch,
+historical initialization and dataset revision hashes, evaluation labels,
+and per-trial outcome tables. These records remain unavailable.
 
-The data curation is documented as recovered history.
-Where exact episode boundaries or task shorthand are unresolved, the code
-does not guess and silently reconstruct the final dataset. It
-accepts the curated artifact or prepares a new dataset supplied by an
-operator using explicit task strings and stop-label rules.
+Data preparation accepts the curated artifact or creates a new dataset from
+operator-supplied recordings using explicit task strings and stop-label rules.
+The recovered curation history records unresolved episode boundaries and
+task shorthand; reproducing the historical curated dataset requires those
+decisions.
 
 Datasets and checkpoints will be released upon publication.

@@ -1,7 +1,7 @@
 """Offline configuration and launch construction for the SurgeCount robot.
 
-This module deliberately imports no robot, camera, torch, or cloud SDK code.
-Checks may read local JSON and checkpoint metadata, but never open devices.
+This standard-library module validates local JSON and checkpoint metadata.
+Device connections and model imports are deferred to the launched process.
 """
 
 from __future__ import annotations

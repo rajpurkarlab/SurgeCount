@@ -2,7 +2,7 @@
 
 **A Protocol-Guided Composition Harness for Bimanual Surgical Sponge Counting**
 
-Research code prepared for ML4H 2026.
+Research code for ML4H 2026.
 
 SurgeCount uses two SO-101 arms to move individual surgical sponges from a
 source tray into ordered counting slots. A single language-conditioned policy
@@ -15,21 +15,22 @@ predictor, following the original pi0.5 paper (arXiv:2504.16054). At each action
 chunk boundary, the overhead image and an umbrella instruction produce subtask
 text that conditions twelve-dimensional action generation. SurgeCount uses
 thirteen-dimensional outputs and the separate operator/Gemini composition
-harness. See [models](docs/models.md) for the two interfaces and source scope.
+harness. See [models](docs/models.md) for the two interfaces.
 
 This repository contains the data collection, data preparation, training,
 manual deployment, and Gemini composition code, plus an anonymous project
 website. It includes the patched LeRobot source needed by the runtime.
 
-**Datasets and checkpoints will be released upon publication.** This anonymous
-review release contains no project dataset or checkpoint links. Local examples
-allow the code to be inspected and used with independently collected data.
+**Datasets and checkpoints will be released upon publication.**
+
+The local examples support independently collected data and compatible
+checkpoints.
 
 ## Installation
 
 Use **Python 3.12**, FFmpeg (including `ffprobe`), and `uv`. Run commands from
 this repository root. The dependency lock pins `transformers==5.3.0` and uses
-the local LeRobot snapshot rather than an incompatible public package.
+the included LeRobot snapshot.
 
 ```bash
 # Data preparation, offline checks, and tests
@@ -39,10 +40,10 @@ uv sync --frozen --no-editable --python 3.12 --extra data --extra dev
 uv sync --frozen --no-editable --python 3.12 --extra data --extra dev --extra train --extra robot --extra planner
 ```
 
-The full environment installs PyTorch and substantial model dependencies.
-Training uses an NVIDIA GPU; the recovered experiment used an H200. The
-deployment example targets CUDA. MPS is configurable, but was not validated
-as part of this release. Provide platform-appropriate FFmpeg and device
+The full environment installs PyTorch and model dependencies.
+Training uses an NVIDIA GPU; the experiment used an H200. The
+deployment example targets CUDA. See [validation](docs/validation.md) for
+backend coverage. Provide platform-appropriate FFmpeg and device
 drivers before using video or hardware commands. Activate the environment
 with `source .venv/bin/activate` to use the bare command names in the guides.
 These release installs use ordinary packages. After changing source, repeat
@@ -51,9 +52,8 @@ the sync command with `--reinstall-package surgecount` (and
 
 ## Quick start
 
-All four commands support `--help`. These dry runs print validated
-configuration without opening robot ports, starting training, or calling a
-cloud model:
+Use `--help` for command options. These dry runs validate and print
+configuration offline:
 
 ```bash
 uv run --no-sync surgecount-record --config configs/record.json --hardware configs/robot.example.json --dry-run
@@ -68,8 +68,8 @@ uv run --no-sync surgecount-deploy --config configs/deploy.json --hardware confi
    Digit keys label skills; `2` then `a/b/c` selects a slot. See
    [hardware and recording](docs/hardware.md).
 2. **Prepare a new dataset copy.** Inspect your LeRobot v3 data with
-   `surgecount-data inspect`. Add the thirteenth action target with
-   `surgecount-data add-stop`; source data is never edited. See
+   `surgecount-data inspect`. Write a separate dataset with a thirteenth
+   action target using `surgecount-data add-stop`. See
    [data format, cleaning, and stop labels](docs/data.md).
 3. **Train.** Point `configs/train.json` at a locally prepared dataset and
    supply a compatible local initialization checkpoint with `--base-model`.
@@ -83,12 +83,12 @@ uv run --no-sync surgecount-deploy --config configs/deploy.json --hardware confi
    [deployment](docs/deployment.md) for stop rules, timeouts, camera names,
    arm holding, and operator controls.
 
-Commands that start recording/deployment operate real motors. Dry runs and
-`--check` remain offline; calibration is never regenerated on connect.
+Recording and deployment commands operate real motors. `--dry-run` and
+`--check` run offline; robot connections use existing calibration.
 
 ## Final training recipe
 
-| Item | Recovered final setup |
+| Item | Setting |
 | --- | --- |
 | Dataset | Curated bimanual gauze demonstrations; release upon publication |
 | Release initialization | Explicit compatible checkpoint; full finetuning |
@@ -100,20 +100,18 @@ Commands that start recording/deployment operate real motors. Dry runs and
 | Batch / precision | 192 / bfloat16, gradient checkpointing |
 | Checkpoint interval | Every 1,000 steps |
 
-The release config runs 10,000 steps. That stopping point and inherited
-optimizer settings are documented release defaults, not a recovered
-byte-for-byte launch configuration. The trainer uses the `pi05` checkpoint
-interface and leaves `base_model` unset until explicitly supplied.
+The release defaults are 10,000 steps and the vendored optimizer preset.
+The trainer uses the `pi05` checkpoint interface and requires an explicit
+initialization checkpoint through `--base-model`.
 Idle/drop filtering applies to sampled anchor frames; native temporal action
 chunks may extend across task boundaries. New release-trained checkpoints
-retain native camera names;
-the historical deployment preset expects OpenPI names. The deployment
+retain native camera names; the historical deployment preset expects OpenPI
+names. The deployment
 checker requires the selected names to match the checkpoint.
 
-Artifact availability and local checkpoint requirements are described in
-[models](docs/models.md). The code release does not contain raw demonstrations
-or model weights. The curated dataset and eligible training subset are
-distinct from the original recording collection; see the [lineage](docs/data.md).
+See [models](docs/models.md) for local checkpoint requirements and
+[data lineage](docs/data.md) for the recording collection, curated dataset,
+and eligible training subset.
 
 ## Repository map
 
@@ -136,19 +134,17 @@ uv run --no-sync python tools/check_release.py
 uv run --no-sync python tools/check_website.py --media
 ```
 
-CI runs offline tests and artifact checks without credentials or hardware.
-See [validation](docs/validation.md) for what was tested and what still
-requires the original robot, dataset, or checkpoints.
+CI tests data preparation, filtering, runtime controls, and release artifacts
+offline. See [validation](docs/validation.md) for test coverage and hardware
+validation requirements.
 
 ## Website and licensing
 
-The code and website are prepared for anonymous review; see the
+The code and website support anonymous review; see the
 [anonymous release notes](docs/anonymity.md). Serve only `website/` as the
-web artifact. The website contains no author,
-institution, personal account, manuscript, or repository links and makes no
-third-party resource requests. See [website notes](docs/website.md).
+web artifact. The page uses anonymous attribution and local assets. See
+[website notes](docs/website.md).
 
 First-party code and the LeRobot snapshot use Apache-2.0. The website layout
 and third-party assets have separate terms in [THIRD_PARTY.md](THIRD_PARTY.md).
-Use `CITATION.cff` for the current anonymous software citation; no acceptance
-or publication identifier is claimed.
+Use `CITATION.cff` for the anonymous software citation.

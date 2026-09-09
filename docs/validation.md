@@ -1,7 +1,6 @@
 # Release validation
 
-Validation covers the prepared source and static website. It does not
-constitute a new robot experiment or reproduction of the paper's results.
+Release validation covers offline software, packaging, and website checks.
 
 ## Checks performed
 
@@ -21,12 +20,12 @@ constitute a new robot experiment or reproduction of the paper's results.
 - Runtime checks cover offline configuration, calibration/checkpoint
   preflight, stop lookahead, interpolation, failed checkpoint loading,
   dynamic action-queue resizing, and operator priority over late planner
-  responses. They use fixtures and stubs rather than physical devices.
+  responses. These checks use fixtures and stubs.
 - All vendored Python files parse under Python3.12. The recorder and trainer
   import using the existing robot environment with transformers5.3.0.
   Generated recording/deployment arguments parse through the actual LeRobot
-  dataclasses. A training-config integration test uses mocked metadata and
-  weight-loading entry points, without downloading or constructing a model.
+  dataclasses. A training-config integration check uses mocked metadata and
+  weight-loading entry points.
 - First-party lint, release-content scanning, website local-target checks,
   and image/video metadata checks pass. Root and vendored packages build.
 - Anonymity regressions cover account links, personal paths, hidden metadata,
@@ -41,29 +40,29 @@ constitute a new robot experiment or reproduction of the paper's results.
   All eight videos decode successfully. The supplied clip video bitstreams
   are unchanged; container metadata and timecode tracks were stripped.
 
-## Limits and unresolved provenance
+## Deployment validation
 
-No training job, GPU inference, physical robot connection, real pretrained
-weight load, or paid planner API call was made during release preparation.
-The full train/robot dependency lock was resolved, while the fresh
-installation test used the lightweight data/development extras. Native
-device libraries and GPU wheels need validation on the deployment machine.
+Training, real checkpoint loading, GPU inference, physical robot operation,
+and live planner calls remain untested in this release audit. Validate these
+on the target setup, including native device libraries and GPU wheels.
+The full train/robot dependency lock was resolved; the fresh installation
+test used the data/development extras.
 
-Datasets and checkpoints will be released upon publication. The anonymous
-release includes neither artifact links nor copies of the training data or weights.
-Exact final episode-boundary conventions, immutable Hub revisions, and the
-deleted historical launch configuration are not recovered. The example
-config states its defaults and enforces dimensional/task/camera consistency.
-Its successful dry run is not evidence that an external artifact has been
-downloaded or verified.
+The deployment preset targets CUDA. MPS is configurable and remains untested.
 
-Video visual review sampled six frames from each clip, plus the
-posters. The architecture figure is retained following visual review,
-including its training inset containing a partial operator profile.
-Source and media metadata scans complement that review. No manuscript,
-private chat history, calibration, credentials, or raw recordings are in
-the distributable source artifact. The complete source archive and website
-were checked for project account
-identifiers, artifact names, personal paths, host addresses, source-history
-fingerprints, and file metadata. Required upstream copyright attribution
-is retained. See [anonymous release notes](anonymity.md).
+The example configuration defines defaults and enforces dimensional, task,
+and camera consistency. Dry runs validate configuration; checkpoint checks
+inspect local metadata. Historical configuration gaps are recorded in
+[source provenance](provenance.md).
+
+## Media and artifact review
+
+Visual review covered six frames per clip, all posters, and the architecture
+figure, including its training inset with a partial operator profile.
+Source and media metadata scans checked the complete source archive and
+website for project account identifiers, artifact names, personal paths,
+host addresses, source-history fingerprints, and identifying file metadata.
+The export allowlist defines the distributed files; upstream copyright
+attribution is retained. See [anonymous release notes](anonymity.md).
+
+Datasets and checkpoints will be released upon publication.

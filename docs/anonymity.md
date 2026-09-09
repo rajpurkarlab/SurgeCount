@@ -4,8 +4,7 @@
 accounts, dataset/checkpoint repository names and links, personal paths,
 machine addresses, private source-history identifiers, and author contact
 details are omitted from this release. Examples use local placeholders.
-The public upstream base model and required third-party copyright and
-license credits remain identified.
+Upstream dependencies retain their required copyright and license credits.
 
 ## Exporting the repository
 
@@ -32,6 +31,7 @@ option. Keep real hardware configuration, local datasets, checkpoints,
 and generated run manifests outside the public repository.
 
 The website uses local assets and has been checked for identifying text
-and media metadata. Sampled visual review of the clips cannot certify every
-frame; see [website notes](website.md). Review replacement media and rerun
+and media metadata. Visual review covered six frames per clip, all posters,
+and the architecture figure; see [website notes](website.md).
+Review replacement media and rerun
 the release checks before updating the public artifact.

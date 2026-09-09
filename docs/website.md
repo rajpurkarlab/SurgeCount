@@ -1,11 +1,11 @@
 # Anonymous project page
 
-The static page in `website/` is prepared for **Anonymous submission · ML4H
-2026**. The title follows the revised working draft. It does not claim
-acceptance. The supplied layout, results, and eight short demonstration videos are
-retained. The architecture figure is retained following visual review. The page is self-contained: it
-uses local styles, JavaScript, images, and videos, with system fonts and no
-analytics, embedded remote players, or third-party requests.
+The static page in `website/` presents SurgeCount as an **Anonymous submission
+· ML4H 2026**, with the system architecture, measured results, and eight
+demonstration videos. The page uses local styles, JavaScript, images, and
+videos with system fonts.
+
+Datasets and checkpoints will be released upon publication.
 
 Preview from the release root:
 
@@ -14,40 +14,33 @@ python3 tools/check_website.py --media
 python3 -m http.server 8000 --bind 127.0.0.1 --directory website
 ```
 
-Open `http://127.0.0.1:8000/`. Serving the `website/` directory alone prevents
-the surrounding repository and working documents from being part of the
-preview. Only this directory is a website artifact. No hosting credentials,
-hostnames, server addresses, or deployment configuration are included.
+Open `http://127.0.0.1:8000/`. Serve `website/` as the complete web artifact.
 
 ## Content and anonymization
 
-- Anonymous author and venue labels appear in the page and metadata. Old
-  venue mentions and the unused citation block are removed.
-- Placeholder Paper, arXiv, and Code buttons are removed. The working draft
-  is not included or linked. No author, institution, personal account,
-  dataset, checkpoint, repository, or contact links are published.
-- HTML comments, unused template scripts, unused images, and the original
-  favicon are omitted. Template credit is retained in a local notice.
-- The eight existing short MP4s are remuxed without audio, data/timecode
-  tracks, chapters, or descriptive metadata. Encoded video is copied without
-  re-encoding. Images are saved without EXIF, XMP, or text metadata.
-- Six frames distributed across each clip were visually reviewed, along
-  with the posters and architecture figure. The architecture figure is
-  retained following review of its training inset, which includes a partial
-  operator profile. This is a sampled visual review; metadata validation
-  cannot certify every visible frame.
+- Anonymous author and ML4H 2026 venue labels appear in the page and metadata.
+- All page resources and links resolve locally. Template credit and license
+  attribution appear in the local notice.
+- Each MP4 contains a single video stream with neutral container metadata.
+  Remuxing preserves the encoded video and removes audio, data/timecode
+  tracks, chapters, and descriptive metadata. Images have EXIF, XMP, and
+  text metadata removed.
+- Visual review sampled six frames distributed across each clip and covered
+  the posters and architecture figure, including its training inset.
 
-The written system overview and page prose use "subtask-conditioned VLA."
-This cleanup does not revise manuscript results or experimental claims.
+The system overview describes SurgeCount's language-conditioned policy with
+twelve robot actions, a learned stop signal, and Gemini composition. The
+end-to-end pi0.5 baseline uses a trained pi0-based subtask predictor to
+condition twelve-dimensional actions at chunk boundaries.
 
 ## Validation
 
-`tools/check_website.py` checks all local HTML asset/link targets and fragment
-IDs, rejects external resource URLs, personal contact links, host addresses,
+`tools/check_website.py` checks local HTML asset/link targets and fragment
+IDs and rejects external resource URLs, personal contact links, host addresses,
 old venue labels, missing anonymous metadata, hidden files, and document
 downloads. It scans text inside comments as well as visible text. Optional
 `--deny-term` arguments allow reviewers to check additional private
-identifiers without saving those identifiers in this anonymous release.
+identifiers supplied at invocation time.
 
 `--media` also validates the MP4 streams and metadata using `ffprobe` and
 checks PNG/JPEG metadata using Python's standard library. It requires an
@@ -59,6 +52,6 @@ original sources additionally requires `ffmpeg` and Pillow.
 python3 -m unittest discover -s tests -p 'test_website.py'
 ```
 
-Before replacing any media, visually inspect it and rerun the checks.
-Robots metadata and `robots.txt` request exclusion from indexing; they do
-not provide access control.
+Visually inspect replacement media and rerun the checks before publishing.
+Robots metadata and `robots.txt` request exclusion from indexing. Configure
+access control at the hosting layer when restricting who can view the page.

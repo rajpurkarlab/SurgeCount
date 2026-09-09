@@ -12,28 +12,30 @@ for that machine. On Linux, stable `/dev/serial/by-id` and `/dev/v4l/by-id`
 paths avoid numeric index changes after reconnecting. Other platforms can
 use serial device paths and integer OpenCV camera indices.
 
-Calibration and home poses are machine-specific and are not distributed.
+Provide machine-specific calibration and home poses.
 The follower calibration directory must contain `bimanual_left.json` and
 `bimanual_right.json`; the leader directory must contain
 `bimanual_leader_left.json` and `bimanual_leader_right.json`. If IDs change,
 filenames must change accordingly. Use independently verified calibration
 for each physical arm. The release controller connects with
-`calibrate=False` and never initiates interactive calibration. Confirm that
+`calibrate=False`, using the saved calibration. Confirm that
 motor calibration matches the saved files before deployment.
 
 `use_degrees` is explicit for each arm. The example retains the source
 configuration's degree convention for joint positions; grippers use their
 configured normalized range. This setting must match the demonstration
 data and trained policy. `max_relative_target` is available for a
-machine-specific motion limit; the example does not invent a limit.
+machine-specific motion limit. The example leaves it unset; configure a limit
+validated for the setup.
 
 The optional home file is text containing one `joint_name=value` per line
 for all twelve joint/gripper targets. Joint names are `left_` and `right_`
 plus `shoulder_pan.pos`, `shoulder_lift.pos`, `elbow_flex.pos`,
-`wrist_flex.pos`, `wrist_roll.pos`, and `gripper.pos`. No joint angles are
-provided. Removing `home_pose_file` disables between-episode homing; a
+`wrist_flex.pos`, `wrist_roll.pos`, and `gripper.pos`. Removing
+`home_pose_file` disables between-episode homing; a
 home pose is required when enabling timeout recovery or Gemini's
-`ra_home` skill. The wrapper does not perform startup homing.
+`ra_home` skill. Homing runs between episodes and through operator or
+recovery commands; startup homing is disabled.
 
 From the repository root, inspect a launch before connecting:
 
@@ -44,8 +46,8 @@ surgecount-record --config configs/record.json --hardware /path/to/robot.json
 ```
 
 `--dry-run` validates schema and prints the argument vector. `--check` also
-reads the local calibration/home files. Neither mode imports hardware
-drivers, opens devices, or records data. Actual recording requires the
+reads the local calibration/home files. Both modes run offline with hardware
+drivers unloaded and devices disconnected. Actual recording requires the
 robot extra, FFmpeg, and access to the configured devices.
 
 During teleoperation, digits select the per-frame language instruction;
@@ -59,6 +61,6 @@ The collection wrapper preregisters all thirteen canonical task labels so
 dataset task IDs remain stable regardless of the first skill recorded.
 Keyboard digits and dataset task IDs are different; see `tasks.py`.
 
-Local recordings are never uploaded by the wrappers. Choose a fresh
+The wrappers store recordings locally. Choose a fresh
 `dataset.root`; use `resume: true` only to append to an existing compatible
 dataset. Run recordings interactively in a terminal with keyboard access.
