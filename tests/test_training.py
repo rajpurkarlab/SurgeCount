@@ -18,6 +18,7 @@ from surgecount.training import (
     main,
     mask_sample,
     masked_collate,
+    resolve_initialization,
     run_training,
     training_hooks,
     validate_training_dataset,
@@ -128,7 +129,8 @@ def test_config_and_no_dependency_dry_run(tmp_path, capsys):
     loaded = load_config(config)
     assert loaded.min_episode_index == 251
     assert loaded.dataset_repo_id == "local/gauze_training"
-    assert loaded.output_dir == "outputs/train/pi05_singlecam"
+    assert loaded.output_dir == "outputs/train/skill_singlecam"
+    assert loaded.base_model is None
     main(["--config", str(config), "--dry-run"])
     output = json.loads(capsys.readouterr().out)
     assert output["full_finetune"] is True
@@ -176,13 +178,90 @@ def test_anonymous_example_dry_run_and_explicit_dataset_override(monkeypatch, ca
     main(["--config", str(config), "--dry-run"])
     result = json.loads(capsys.readouterr().out)
     assert result["configuration"]["dataset_repo_id"] == "local/gauze_training"
-    assert result["configuration"]["base_model"] == "lerobot/pi05_base"
+    assert result["configuration"]["base_model"] is None
     assert result["configuration"]["dataset_root"] is None
     owner, repository = "example-user", "my-demonstrations"
     remote_fixture = "/".join((owner, repository))
     explicit = load_config(config, dataset_repo_id=remote_fixture)
     explicit.validate(require_local_data=True)
     assert explicit.dataset_repo_id == remote_fixture
+
+
+@pytest.fixture
+def local_dataset_tree(tmp_path):
+    # Only filesystem completeness is needed: initialization must be checked
+    # before the dataset parser or other ML imports can run.
+    root = tmp_path / "dataset"
+    for name in (
+        "meta/info.json",
+        "meta/stats.json",
+        "meta/tasks.parquet",
+        "meta/episodes/file.parquet",
+        "data/file.parquet",
+    ):
+        path = root / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}")
+    return root
+
+
+@pytest.mark.parametrize("initialization", [None, ""])
+def test_missing_initialization_fails_offline(monkeypatch, local_dataset_tree, tmp_path, initialization):
+    block_training_imports(monkeypatch)
+    with pytest.raises(ValueError, match="explicit initialization checkpoint is required"):
+        run_training(
+            TrainingConfig(
+                dataset_root=str(local_dataset_tree), base_model=initialization, output_dir=str(tmp_path / "run")
+            )
+        )
+    assert not (tmp_path / "run").exists()
+
+
+def test_missing_relative_checkpoint_never_becomes_hub_request(monkeypatch, local_dataset_tree, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    block_training_imports(monkeypatch)
+    relative_checkpoint = str(Path("weights") / "checkpoint")
+    with pytest.raises(FileNotFoundError, match="Local initialization checkpoint is missing"):
+        run_training(
+            TrainingConfig(
+                dataset_root=str(local_dataset_tree), base_model=relative_checkpoint, output_dir=str(tmp_path / "run")
+            )
+        )
+    with pytest.raises(FileNotFoundError, match="Local initialization checkpoint is missing"):
+        resolve_initialization(str(tmp_path / "missing"))
+
+
+def test_invalid_initialization_config_fails_offline(monkeypatch, local_dataset_tree, tmp_path):
+    checkpoint = tmp_path / "checkpoint"
+    checkpoint.mkdir()
+    (checkpoint / "model.safetensors").write_bytes(b"weight loading is outside this configuration test")
+    (checkpoint / "config.json").write_text("not json")
+    block_training_imports(monkeypatch)
+    config = TrainingConfig(
+        dataset_root=str(local_dataset_tree), base_model=str(checkpoint), output_dir=str(tmp_path / "run")
+    )
+    with pytest.raises(ValueError, match="Invalid initialization checkpoint config"):
+        run_training(config)
+    (checkpoint / "config.json").write_text(json.dumps({"type": "pi0"}))
+    with pytest.raises(ValueError, match="Expected checkpoint policy type pi05"):
+        run_training(config)
+
+
+def test_cli_explicit_checkpoint_and_intentional_hub_initialization(monkeypatch, tmp_path, capsys):
+    checkpoint = tmp_path / "checkpoint"
+    checkpoint.mkdir()
+    (checkpoint / "config.json").write_text(json.dumps({"type": "pi05"}))
+    (checkpoint / "model.safetensors").write_bytes(b"weight loading is outside this configuration test")
+    block_training_imports(monkeypatch)
+    main(["--base-model", str(checkpoint), "--dry-run"])
+    report = json.loads(capsys.readouterr().out)
+    assert report["configuration"]["base_model"] == str(checkpoint)
+    assert resolve_initialization(str(checkpoint)) == ("local", str(checkpoint.resolve()))
+    owner, repository = "example-user", "initialization"
+    remote_id = "/".join((owner, repository))
+    assert resolve_initialization("hf://" + remote_id) == ("hub", remote_id)
+    with pytest.raises(ValueError, match="valid namespace and repository"):
+        resolve_initialization("hf://" + owner)
 
 
 def test_scoped_processors_use_new_stats_and_hooks_restore():

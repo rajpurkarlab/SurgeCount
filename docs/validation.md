@@ -11,9 +11,9 @@ constitute a new robot experiment or reproduction of the paper's results.
 - The collection, training, and deployment console scripts passed dry runs
   from an ordinary package installation. The data console script exposes
   both audit and fresh-copy preparation commands.
-- 101 offline tests passed in the available test environment with PyTorch;
-  ten additional unittest subtests passed. In the isolated Python3.12 data
-  environment, 99 tests passed and the two PyTorch-dependent cases skipped.
+- 106 offline tests passed in the available test environment with PyTorch;
+  ten additional unittest subtests passed. The lightweight data environment
+  skips the two PyTorch-dependent cases.
 - The suite covers real Parquet/Arrow metadata, shard-spanning stop labels,
   source-file hash preservation, canonical task remapping, action13 global
   and per-episode statistics, sparse episode indexing, camera masking,
@@ -32,6 +32,9 @@ constitute a new robot experiment or reproduction of the paper's results.
 - Anonymity regressions cover account links, personal paths, hidden metadata,
   binary identifier scans, and exact ZIP membership and neutral metadata.
   Local training placeholders cannot trigger a remote dataset lookup.
+  Training requires explicit initialization; missing or incompatible local
+  checkpoints fail before ML imports or Hub access. Remote initialization
+  requires an explicit Hub URI.
   Video metadata checks accept the neutral zero vendor field emitted by
   older FFmpeg versions and continue to reject identifying vendor values.
 - The page was inspected in a browser at wide and narrow viewport sizes.

@@ -86,7 +86,7 @@ def test_upstream_base_and_dependency_links_are_allowed(tmp_path):
     write(
         tmp_path,
         "docs/deps.md",
-        "`lerobot/pi05_base`\nhttps://huggingface.co/lerobot/pi05_base\n"
+        "`lerobot/pi0_base`\nhttps://huggingface.co/lerobot/pi0_base\n"
         "https://github.com/huggingface/lerobot\nhttps://files.pythonhosted.org/package.whl\n",
     )
     assert not any("deps.md" in issue for issue in release_check.check_release(tmp_path))

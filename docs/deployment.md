@@ -1,7 +1,7 @@
 # Deployment
 
 **Datasets and checkpoints will be released upon publication.** The release
-configuration targets a single-camera pi0.5 policy and uses a generic local
+configuration targets a single-camera skill policy and uses a generic local
 checkpoint placeholder. Supply a local checkpoint containing `config.json`,
 `model.safetensors`, and the saved policy pre/postprocessor JSON and
 normalization state files. Provision the tokenizer cache in the target
@@ -15,7 +15,7 @@ surgecount-deploy --config configs/deploy.json --hardware /path/to/robot.json --
 ```
 
 Both check modes leave hardware disconnected. `--check` validates local
-calibration/home files and checkpoint metadata, including pi05, thirteen
+calibration/home files and checkpoint metadata, including the `pi05` loader type, thirteen
 action dimensions, and camera keys. It does not instantiate the large
 policy or establish that inference will meet its timing target.
 

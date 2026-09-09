@@ -1,13 +1,16 @@
-# Training pi0.5 for SurgeCount
+# Training SurgeCount skills
 
-The release trains individual language-conditioned gauze-handling skills. The deployment harness selects and sequences those skills into a complete counting procedure.
+The release trains individual language-conditioned gauze-handling skills with twelve robot commands and a stop signal. The operator/Gemini deployment harness selects and sequences those skills into a complete counting procedure.
+
+The end-to-end pi0.5 baseline uses a pi0-based policy with a trained subtask predictor, following the original pi0.5 paper (arXiv:2504.16054). At each action chunk boundary, the overhead image and umbrella instruction produce subtask text that conditions twelve-dimensional action generation, with no stop signal. Its predictor-training branch and exact objective remain pending source recovery. The training commands below cover the thirteen-dimensional SurgeCount skill policy.
 
 ## Final recipe and reconstruction limits
 
 | Condition | Setting |
 | --- | --- |
 | Dataset | Curated bimanual gauze demonstrations; release upon publication |
-| Initial weights | `lerobot/pi05_base` |
+| Initial weights | Explicit compatible checkpoint supplied with `--base-model` |
+| Checkpoint interface | LeRobot `pi05` |
 | Targets | 12 robot commands plus stop at dimension 12 |
 | Stop targets | Final ten frames of each contiguous skill segment |
 | Episode subset | Default `episode_index >= 251`, inclusive |
@@ -24,9 +27,14 @@ The release trains individual language-conditioned gauze-handling skills. The de
 checkpoint steps are 4,000, 6,000, 9,000, and 10,000. Their account names,
 repository identifiers, and download links are withheld for anonymous review.
 
-The original complete final launch configuration was not recovered. The 10,000-update default reaches the highest reported checkpoint step. The inclusive episode boundary, optimizer/scheduler settings, action chunk size, and worker settings in `configs/train.json` are explicit reconstruction choices, not proof of the exact historical invocation. The optimizer defaults come from the vendored pi0.5 preset. LeRobot scales scheduler timing for shorter runs; the effective pipeline configuration is saved with checkpoints.
+The original complete final launch configuration was not recovered. The 10,000-update default reaches the highest reported checkpoint step. The inclusive episode boundary, optimizer/scheduler settings, action chunk size, and worker settings in `configs/train.json` are explicit reconstruction choices. The optimizer defaults come from the vendored `pi05` preset. LeRobot scales scheduler timing for shorter runs; the effective pipeline configuration is saved with checkpoints.
 
-Dataset and base-model revisions are configurable. Set `dataset_revision` and `base_revision` to immutable Hub commit hashes when creating a run intended for exact future reproduction. A base download resolves configuration and weights into the same snapshot. No revision hashes are invented in the example configuration.
+The example leaves `base_model` unset. Supply a compatible local initialization checkpoint with `--base-model`; its configuration and weights must load through the `pi05` interface. Record dataset and initialization revisions in your private run configuration for future reproduction. For Hub-backed artifacts, `dataset_revision` and `base_revision` accept immutable commit hashes.
+
+Ordinary initialization values name local directories. An intentional Hub
+initialization uses `hf://` followed by a namespace and repository name.
+Missing initialization or an invalid local checkpoint fails before model
+imports or downloads.
 
 ## Prepare and inspect
 
@@ -36,7 +44,8 @@ First prepare the action13 dataset using [data.md](data.md). The default `local/
 
 ```bash
 surgecount-train --config configs/train.json \
-  --dataset-root /path/to/prepared_dataset --dry-run
+  --dataset-root /path/to/prepared_dataset \
+  --base-model /path/to/initialization_checkpoint --dry-run
 ```
 
 The dry run prints the complete release recipe and, when given a local root, computed local task/frame counts. It does not contact the Hub, load model weights, allocate a GPU model, start training, or open robot devices. The local dry-run audit counts eligible anchors; full per-row stop-label and normalization validation runs before actual model creation.
@@ -46,10 +55,11 @@ Start a real run after reviewing the data:
 ```bash
 surgecount-train --config configs/train.json \
   --dataset-root /path/to/prepared_dataset \
-  --output-dir outputs/train/pi05_singlecam_run1
+  --base-model /path/to/initialization_checkpoint \
+  --output-dir outputs/train/skill_singlecam_run1
 ```
 
-An existing output directory is refused. This entry point starts a new finetuning run; resuming historical checkpoints is not exposed as an unchecked shortcut. It saves locally and does not upload datasets or models. The base weights and tokenizer may be downloaded on the first real run, subject to their upstream access requirements.
+An existing output directory is refused. This entry point starts a new finetuning run and saves locally. Provision the initialization checkpoint and its tokenizer before starting a run with local artifacts.
 
 ## What the implementation checks
 
@@ -59,7 +69,7 @@ The filtering wrapper selects **positions in the already loaded LeRobot table**,
 
 “Idle/drop excluded” follows the recovered **anchor-sampling** implementation. A selected anchor's future action chunk can still cross into another task or idle frames within the same episode. This release preserves that behavior and does not claim every future target frame was removed. Segment clipping or temporal loss masking would be a changed training condition.
 
-The network retains pi0.5's padded action projection width (normally 32), so a 13-dimensional target does not require resizing pretrained projection tensors. Dataset features specify the 13 valid output dimensions; LeRobot pads internally and trains on those valid dimensions. The entire pretrained model is loaded strictly through the vendored fail-closed loader. Weight errors stop the run instead of continuing from random initialization.
+The `pi05` checkpoint interface retains a padded action projection width (normally 32), so a 13-dimensional target does not require resizing compatible pretrained projection tensors. Dataset features specify the 13 valid output dimensions; LeRobot pads internally and trains on those valid dimensions. The entire initialization checkpoint is loaded strictly through the vendored fail-closed loader. Weight errors stop the run.
 
 Pre/postprocessors are built fresh using this dataset's 13-dimensional action statistics and 12-dimensional state statistics. This avoids accidentally loading a base checkpoint's mismatched normalizers or relative-action transform. Robot actions remain absolute, and the language input is the current subtask instruction.
 

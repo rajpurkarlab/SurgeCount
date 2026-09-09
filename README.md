@@ -5,9 +5,17 @@
 Research code prepared for ML4H 2026.
 
 SurgeCount uses two SO-101 arms to move individual surgical sponges from a
-source tray into ordered counting slots. A single pi0.5 policy learns eleven
-language-conditioned skills and their stopping signal. An operator or a
-stateful vision-language planner chooses the next skill at each boundary.
+source tray into ordered counting slots. A single language-conditioned policy
+learns eleven skills and a stopping signal alongside twelve robot actions.
+An operator or a stateful vision-language planner chooses the next skill at
+each boundary.
+
+The end-to-end pi0.5 baseline is implemented from pi0 with a trained subtask
+predictor, following the original pi0.5 paper (arXiv:2504.16054). At each action
+chunk boundary, the overhead image and an umbrella instruction produce subtask
+text that conditions twelve-dimensional action generation. SurgeCount uses
+thirteen-dimensional outputs and the separate operator/Gemini composition
+harness. See [models](docs/models.md) for the two interfaces and source scope.
 
 This repository contains the data collection, data preparation, training,
 manual deployment, and Gemini composition code, plus an anonymous project
@@ -63,10 +71,11 @@ uv run --no-sync surgecount-deploy --config configs/deploy.json --hardware confi
    `surgecount-data inspect`. Add the thirteenth action target with
    `surgecount-data add-stop`; source data is never edited. See
    [data format, cleaning, and stop labels](docs/data.md).
-3. **Train.** Point `configs/train.json` at a locally prepared dataset. Inspect
-   the dry-run report, then launch with `surgecount-train`. See
+3. **Train.** Point `configs/train.json` at a locally prepared dataset and
+   supply a compatible local initialization checkpoint with `--base-model`.
+   Inspect the dry-run report, then launch with `surgecount-train`. See
    [training](docs/training.md) for episode filtering, normalization, and
-   pretrained initialization.
+   checkpoint initialization.
 4. **Deploy.** Provision a local checkpoint and tokenizer cache, complete the
    hardware configuration, and run `surgecount-deploy --check` before the
    real command. Manual skill selection is the default. For the automated
@@ -82,7 +91,7 @@ Commands that start recording/deployment operate real motors. Dry runs and
 | Item | Recovered final setup |
 | --- | --- |
 | Dataset | Curated bimanual gauze demonstrations; release upon publication |
-| Initialization | `lerobot/pi05_base`, full finetuning |
+| Release initialization | Explicit compatible checkpoint; full finetuning |
 | Episode subset | After 250; release default is `episode_index >= 251` |
 | Sampling | Exclude idle task 0 and drop task 8 as training anchors |
 | Observations | Twelve joint/gripper states; three recorded RGB views |
@@ -93,9 +102,11 @@ Commands that start recording/deployment operate real motors. Dry runs and
 
 The release config runs 10,000 steps. That stopping point and inherited
 optimizer settings are documented release defaults, not a recovered
-byte-for-byte launch configuration. Idle/drop filtering applies to sampled
-anchor frames; native temporal action chunks may extend across task
-boundaries. New release-trained checkpoints retain native camera names;
+byte-for-byte launch configuration. The trainer uses the `pi05` checkpoint
+interface and leaves `base_model` unset until explicitly supplied.
+Idle/drop filtering applies to sampled anchor frames; native temporal action
+chunks may extend across task boundaries. New release-trained checkpoints
+retain native camera names;
 the historical deployment preset expects OpenPI names. The deployment
 checker requires the selected names to match the checkpoint.
 

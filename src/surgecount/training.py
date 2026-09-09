@@ -1,4 +1,4 @@
-"""SurgeCount pi0.5 training with explicit local-row filtering and camera masks.
+"""Train a language-conditioned skill policy with local-row filtering and camera masks.
 
 The heavy LeRobot/PyTorch stack is imported only when training starts. --dry-run
 can inspect configuration without a GPU, hardware access, or Hub requests.
@@ -13,6 +13,7 @@ from dataclasses import asdict, dataclass, fields
 import json
 import logging
 from pathlib import Path
+import re
 from unittest.mock import patch
 
 from surgecount.tasks import ALL_CAMERAS, EXCLUDE_TASKS, TASK_CAMERA, TASK_LABELS, validate_task_labels
@@ -25,9 +26,9 @@ class TrainingConfig:
     dataset_repo_id: str = "local/gauze_training"
     dataset_root: str | None = None
     dataset_revision: str | None = None
-    base_model: str = "lerobot/pi05_base"
+    base_model: str | None = None
     base_revision: str | None = None
-    output_dir: str = "outputs/train/pi05_singlecam"
+    output_dir: str = "outputs/train/skill_singlecam"
     min_episode_index: int = 251
     max_episode_index: int | None = None
     batch_size: int = 192
@@ -67,8 +68,10 @@ class TrainingConfig:
                 raise ValueError("max_episode_index must be an integer >= min_episode_index")
         if self.dtype not in ("bfloat16", "float32"):
             raise ValueError("dtype must be bfloat16 or float32")
-        if not self.dataset_repo_id or not self.base_model or not self.output_dir:
-            raise ValueError("dataset_repo_id, base_model, and output_dir are required")
+        if not self.dataset_repo_id or not self.output_dir:
+            raise ValueError("dataset_repo_id and output_dir are required")
+        if self.base_model is not None and not isinstance(self.base_model, str):
+            raise ValueError("base_model must be an explicit checkpoint path, Hub URI, or null for a dry run")
         if self.optimizer_lr <= 0 or self.scheduler_decay_lr < 0 or self.optimizer_weight_decay < 0:
             raise ValueError("Invalid optimizer or scheduler values")
         if require_local_data and self.dataset_repo_id.startswith("local/"):
@@ -106,6 +109,48 @@ def load_config(path=None, **overrides):
     config = TrainingConfig(**values)
     config.validate()
     return config
+
+
+def resolve_initialization(value):
+    """Validate an explicit initialization choice without importing ML or Hub code.
+
+    Ordinary strings are local directories. Only an explicit hf:// URI opts into
+    a remote repository, so a missing relative path never becomes a Hub request.
+    A checkpoint's policy type establishes adapter compatibility, not its origin.
+    """
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(
+            "An explicit initialization checkpoint is required. Supply --base-model with a local "
+            "checkpoint directory or an intentional hf:// Hub URI; initialization is not inferred."
+        )
+    if value.startswith("hf://"):
+        repository = value.removeprefix("hf://")
+        parts = repository.split("/")
+        if len(parts) != 2 or any(
+            not re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_.-]{0,95}", part)
+            or part.endswith((".", "-"))
+            or "--" in part
+            or ".." in part
+            for part in parts
+        ):
+            raise ValueError("The hf:// initialization URI must contain a valid namespace and repository name")
+        return "hub", repository
+    directory = Path(value).expanduser().resolve()
+    required = ("config.json", "model.safetensors")
+    missing = [name for name in required if not (directory / name).is_file()]
+    if missing:
+        raise FileNotFoundError(
+            f"Local initialization checkpoint is missing {', '.join(missing)}: {directory}. "
+            "Use an explicit hf:// URI only when a remote initialization is intended."
+        )
+    try:
+        checkpoint_config = json.loads((directory / "config.json").read_text())
+    except (ValueError, UnicodeError) as error:
+        raise ValueError(f"Invalid initialization checkpoint config.json: {directory}") from error
+    checkpoint_type = checkpoint_config.get("type") if isinstance(checkpoint_config, dict) else None
+    if checkpoint_type != "pi05":
+        raise ValueError(f"Expected checkpoint policy type pi05, got {checkpoint_type!r}")
+    return "local", str(directory)
 
 
 def eligible_row_indices(episode_indices, task_indices, min_episode_index=251, max_episode_index=None):
@@ -315,6 +360,7 @@ def training_hooks(train_module, release_config):
 
 def run_training(config):
     config.validate(require_local_data=True)
+    initialization_kind, initialization_location = resolve_initialization(config.base_model)
     if Path(config.output_dir).exists():
         raise FileExistsError(f"Output already exists: {config.output_dir}; choose a new run directory")
     # Imports below may initialize frameworks; --dry-run never reaches here.
@@ -337,17 +383,17 @@ def run_training(config):
     ]
     if not selected:
         raise ValueError("No episode metadata IDs match the configured inclusive bounds")
-    base_path = config.base_model
-    if not Path(base_path).is_dir():
+    base_path = initialization_location
+    if initialization_kind == "hub":
         # A concrete snapshot path makes config and weights resolve to one revision.
         base_path = snapshot_download(
-            config.base_model,
+            initialization_location,
             revision=config.base_revision,
             allow_patterns=["config.json", "model.safetensors"],
         )
     policy = PreTrainedConfig.from_pretrained(base_path)
     if policy.type != "pi05":
-        raise ValueError(f"Expected pi05 base, got {policy.type}")
+        raise ValueError(f"Expected checkpoint policy type pi05, got {policy.type!r}")
     if policy.max_action_dim < 13 or policy.max_state_dim < 12:
         raise ValueError("Pretrained model padded dimensions are too small for the robot")
     # make_policy derives actual shapes/cameras from this dataset. The network's
@@ -386,7 +432,7 @@ def run_training(config):
         ),
         policy=policy,
         output_dir=Path(config.output_dir),
-        job_name="surgecount_pi05_singlecam",
+        job_name="skill_singlecam",
         seed=config.seed,
         batch_size=config.batch_size,
         steps=config.steps,
@@ -406,6 +452,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, help="JSON release configuration; omitted uses documented defaults")
     parser.add_argument("--dataset-root", help="Concrete prepared local LeRobot action13 tree")
+    parser.add_argument("--base-model", help="Explicit local initialization checkpoint or intentional hf:// Hub URI")
     parser.add_argument("--output-dir")
     parser.add_argument("--min-episode-index", type=int)
     parser.add_argument("--max-episode-index", type=int)

@@ -1,4 +1,4 @@
-"""Run a local 13-dimensional pi0.5 checkpoint with manual or Gemini skills."""
+"""Run a local 13-dimensional skill checkpoint with manual or Gemini selection."""
 
 from surgecount.runtime import cli
 
