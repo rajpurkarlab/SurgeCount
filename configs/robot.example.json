@@ -1,0 +1,35 @@
+{
+  "robot": {
+    "type": "bi_so_follower",
+    "id": "bimanual",
+    "calibration_dir": "/absolute/path/to/verified/follower/calibration",
+    "left_arm_config": {
+      "port": "/dev/serial/by-id/REPLACE_LEFT_FOLLOWER",
+      "use_degrees": true,
+      "disable_torque_on_disconnect": true,
+      "max_relative_target": null,
+      "cameras": {
+        "left_front": {"type": "opencv", "index_or_path": "/dev/v4l/by-id/REPLACE_LEFT_CAMERA", "width": 640, "height": 480, "fps": 10, "warmup_s": 5, "fourcc": "MJPG"},
+        "top": {"type": "opencv", "index_or_path": "/dev/v4l/by-id/REPLACE_TOP_CAMERA", "width": 640, "height": 480, "fps": 10, "warmup_s": 5, "fourcc": "MJPG"}
+      }
+    },
+    "right_arm_config": {
+      "port": "/dev/serial/by-id/REPLACE_RIGHT_FOLLOWER",
+      "use_degrees": true,
+      "disable_torque_on_disconnect": true,
+      "max_relative_target": null,
+      "cameras": {
+        "right_front": {"type": "opencv", "index_or_path": "/dev/v4l/by-id/REPLACE_RIGHT_CAMERA", "width": 640, "height": 480, "fps": 30, "warmup_s": 5, "fourcc": "MJPG"}
+      }
+    }
+  },
+  "teleop": {
+    "type": "bi_so_leader",
+    "id": "bimanual_leader",
+    "calibration_dir": "/absolute/path/to/verified/leader/calibration",
+    "left_arm_config": {"port": "/dev/serial/by-id/REPLACE_LEFT_LEADER", "use_degrees": true},
+    "right_arm_config": {"port": "/dev/serial/by-id/REPLACE_RIGHT_LEADER", "use_degrees": true}
+  },
+  "home_pose_file": "/absolute/path/to/verified/bimanual_home_position.txt",
+  "home_duration_s": 2.0
+}

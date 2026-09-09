@@ -1,0 +1,17 @@
+{
+  "dataset": {
+    "repo_id": "local/gauze_recording",
+    "root": "outputs/recordings",
+    "fps": 10,
+    "num_episodes": 50,
+    "episode_time_s": 300,
+    "reset_time_s": 1,
+    "reset_wait_enter": true,
+    "streaming_encoding": true,
+    "encoder_threads": 4,
+    "vcodec": "h264"
+  },
+  "resume": false,
+  "display_data": false,
+  "play_sounds": false
+}

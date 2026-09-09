@@ -1,0 +1,15 @@
+include LICENSE NOTICE README.md CITATION.cff
+include THIRD_PARTY.md CONTRIBUTING.md uv.lock .gitignore .env.example
+recursive-include configs *.json
+recursive-include docs *.md
+recursive-include tests *.py
+recursive-include tools *.py
+recursive-include vendor/lerobot *.py *.toml *.md *.mdx LICENSE
+recursive-include website *.html *.css *.js *.txt *.png *.jpg *.svg *.mp4
+recursive-include .github/workflows *.yml
+global-exclude .DS_Store ._* Thumbs.db desktop.ini *.py[cod] *.local.json
+prune .venv
+prune .git
+prune .cache
+prune .pytest_cache
+prune .ruff_cache

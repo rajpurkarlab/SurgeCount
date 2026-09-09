@@ -1,0 +1,14 @@
+SurgeCount
+Copyright 2026 SurgeCount contributors
+
+This distribution includes a modified LeRobot source snapshot in vendor/lerobot.
+LeRobot is Copyright 2024-2026 The HuggingFace Inc. team and contributors and is
+distributed under Apache License 2.0. Original source notices are retained.
+See vendor/lerobot/LICENSE and docs/provenance.md for the source and integration
+changes. Names in upstream notices identify upstream contributors, not submission
+authors.
+
+The website's vendored Bulma CSS is MIT licensed, Copyright 2020 Jeremy Thomas.
+Its original license notice is retained in website/credits.txt.
+The site layout derives from the Nerfies project-page template (CC BY-SA 4.0).
+See THIRD_PARTY.md for attribution and the separate website license scope.

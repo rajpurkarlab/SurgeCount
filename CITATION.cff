@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "Anonymous software artifact for a submission to ML4H 2026; publication details will be added after review."
+type: software
+title: "SurgeCount: A Protocol-Guided Composition Harness for Bimanual Surgical Sponge Counting"
+authors:
+  - name: "Anonymous Authors"
+version: 0.1.0
+license: Apache-2.0

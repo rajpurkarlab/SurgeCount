@@ -1,0 +1,31 @@
+name: Offline release checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install data and development dependencies
+        run: uv sync --frozen --no-editable --python 3.12 --extra data --extra dev
+      - name: Test dataset, configuration, and static website behavior
+        run: uv run --frozen --no-sync pytest
+      - name: Lint first-party Python
+        run: uv run --frozen --no-sync ruff check src tests tools
+      - name: Inspect release contents
+        run: uv run --frozen --no-sync python tools/check_release.py
+      - name: Install media metadata checker
+        run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
+      - name: Check website links and metadata
+        run: uv run --frozen --no-sync python tools/check_website.py --media
+      - name: Build Python package
+        run: uv build --no-sources

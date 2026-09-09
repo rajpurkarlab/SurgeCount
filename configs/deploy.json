@@ -1,0 +1,32 @@
+{
+  "dataset": {
+    "repo_id": "local/evaluation",
+    "root": "outputs/evaluation",
+    "fps": 10,
+    "num_episodes": 999,
+    "episode_time_s": 99999,
+    "reset_time_s": 1,
+    "reset_wait_enter": true,
+    "streaming_encoding": true,
+    "encoder_threads": 4,
+    "vcodec": "h264"
+  },
+  "resume": false,
+  "display_data": false,
+  "play_sounds": false,
+  "deployment": {
+    "checkpoint": "/absolute/path/to/checkpoint",
+    "device": "cuda",
+    "mode": "manual",
+    "image_keys": "openpi",
+    "camera_mask": true,
+    "n_action_steps": 40,
+    "num_inference_steps": 20,
+    "interpolation_multiplier": 3,
+    "stop_mode": "lookahead",
+    "stop_window": 5,
+    "dynamic_chunk": {"enabled": true, "minimum": 5, "maximum": 30, "step": 5, "calls_per_step": 1, "keys": ["1", "6"]},
+    "timeouts": {"1": 60, "5": 30, "6": 60},
+    "planner": {"model": "gemini-3.1-pro-preview", "cooldown_s": 1.0, "confirm_required": false, "prompt_style": "detailed", "thinking_level": "high"}
+  }
+}

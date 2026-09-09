@@ -1,0 +1,37 @@
+# Local machine configuration, credentials, and collected artifacts
+.env
+.env.*
+!.env.example
+configs/robot.local.json
+*.local.json
+/calibration/
+/data/
+/datasets/
+/models/
+/checkpoints/
+/outputs/
+/logs/
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.parquet
+*.pem
+*.key
+
+# Environments and generated build/cache files
+.venv/
+.cache/
+.pytest_cache/
+.ruff_cache/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.DS_Store
+._*
+__MACOSX/
+Thumbs.db
+.idea/
+.vscode/

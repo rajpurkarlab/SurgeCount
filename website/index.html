@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="title" content="SurgeCount - Anonymous submission · ML4H 2026">
+  <meta name="description" content="SurgeCount: a composition harness over an off-the-shelf VLA policy for autonomous bimanual surgical gauze counting. Learned stop boundaries, a stateful VLM orchestrator, and composed recovery turn failing end-to-end policies into a working protocol-constrained system.">
+  <meta name="keywords" content="surgical robotics, gauze counting, vision-language-action, VLA, long-horizon manipulation, bimanual manipulation, skill composition, VLM orchestration, robot learning, ML4H 2026">
+  <meta name="author" content="Anonymous Author(s)">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="language" content="English">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; media-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Anonymous submission · ML4H 2026">
+  <meta property="og:title" content="SurgeCount: A Protocol-Guided Composition Harness for Bimanual Surgical Sponge Counting">
+  <meta property="og:description" content="A composition harness that turns failing end-to-end policies into a working protocol-constrained surgical gauze-counting system.">
+  <meta property="og:image" content="static/images/architecture.png">
+  <meta property="og:image:alt" content="SurgeCount system overview">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SurgeCount: A Protocol-Guided Composition Harness for Bimanual Surgical Sponge Counting">
+  <meta name="twitter:description" content="A composition harness that turns failing end-to-end policies into a working protocol-constrained surgical gauze-counting system.">
+  <meta name="twitter:image" content="static/images/architecture.png">
+
+  <meta name="citation_title" content="SurgeCount: A Protocol-Guided Composition Harness for Bimanual Surgical Sponge Counting">
+  <meta name="citation_author" content="Anonymous Author(s)">
+  <meta name="citation_publication_date" content="2026">
+  <meta name="citation_conference_title" content="Machine Learning for Health (ML4H) 2026">
+
+  <meta name="theme-color" content="#2563eb">
+
+  <title>SurgeCount: A Protocol-Guided Composition Harness for Bimanual Surgical Sponge Counting</title>
+
+  <link rel="icon" type="image/svg+xml" href="static/images/favicon.svg">
+
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+
+  <script defer src="static/js/index.js"></script>
+
+  <style>
+    .stat-number { font-size: 2.6rem; font-weight: 800; line-height: 1.1; }
+    .stat-number.ours { color: #1f7a3d; }
+    .stat-number.base { color: #b03030; }
+    .stat-label { font-size: 0.95rem; color: #4a4a4a; }
+    .mechanism-card { height: 100%; }
+    .video-caption { margin-top: 0.5rem; font-size: 0.95rem; }
+    .section-narrow { max-width: 980px; margin: 0 auto; }
+    .placeholder-note {
+      background: #fff8e1; border: 1px solid #f0d264; border-radius: 8px;
+      padding: 0.5rem 0.9rem; font-size: 0.85rem; color: #7a5d00; display: inline-block;
+    }
+    table.surge-table { margin: 0 auto; }
+    table.surge-table td, table.surge-table th { vertical-align: middle; }
+  </style>
+</head>
+<body>
+
+  <button class="scroll-to-top" title="Scroll to top" aria-label="Scroll to top">
+    <span aria-hidden="true">↑</span>
+  </button>
+
+  <main id="main-content">
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">SurgeCount</h1>
+            <h2 class="subtitle is-4" style="margin-top:-0.5rem;">A Protocol-Guided Composition Harness for Bimanual Surgical Sponge Counting</h2>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">Anonymous authors</span>
+            </div>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><b>Anonymous submission · ML4H 2026</b></span>
+            </div>
+            <p class="is-size-6" style="margin-top:1rem;">Datasets and checkpoints will be released upon publication.</p>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hero teaser">
+    <div class="container is-max-desktop">
+      <div class="hero-body">
+        <div class="columns is-centered">
+          <div class="column is-half">
+            <video poster="static/images/posters/teaser_full_success.jpg" id="teaser-1" autoplay controls muted loop playsinline preload="metadata" style="width:100%; border-radius:8px;">
+              <source src="static/videos/teaser_full_success.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="column is-half">
+            <video poster="static/images/posters/teaser_full_success_2.jpg" id="teaser-2" autoplay controls muted loop playsinline preload="metadata" style="width:100%; border-radius:8px;">
+              <source src="static/videos/teaser_full_success_2.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+        <h2 class="subtitle has-text-centered">
+          <b>Two full procedures, end-to-end.</b> In each run, SurgeCount counts three gauzes into the ordered tray, grasping each by its blue radiopaque thread, verifying every placement, and recovering from failed grasps &mdash; all from subtask-tagged teleoperation and a hand-written protocol prompt.
+        </h2>
+      </div>
+    </div>
+  </section>
+
+  <section class="section hero is-light">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              Surgical sponges are the most common retained foreign object in operating rooms, prevented today by intraoperative counting protocols that combine bimanual handling, ordered placement, and per-step verification. Autonomous gauze counting is a representative real-robot instance of <b>protocol-constrained long-horizon manipulation</b> &mdash; a problem class with deformable objects, occluded grasp landmarks, ordered subtasks, and per-step verification gates that no current benchmark captures together and that simulators abstract away.
+            </p>
+            <p>
+              Across 100 paired-layout real-robot trials (five methods, 20 matched layouts each), four state-of-the-art end-to-end policies trained on the same teleoperation demonstrations cap at 27 of 60 slots filled and 3 of 20 procedures completed. <b>The bottleneck is composition under protocol constraints, not visuomotor capacity.</b> We introduce <b>SurgeCount</b>, a composition harness over an off-the-shelf VLA policy. A learned stop head commits to subtask boundaries, a stateful vision-language model selects the next subtask at each boundary under a prompt-encoded protocol with per-skill verification gates, and recovery composes from release-and-return subtasks already present in the training set.
+            </p>
+            <p>
+              SurgeCount fills <b>47 of 60</b> slots and completes <b>12 of 20</b> procedures, significantly better than the strongest baseline, while adding only operator-entered subtask tags and a hand-written protocol prompt to the shared teleoperation demonstrations. These results identify a practical recipe for protocolized long-horizon manipulation: compose subtask-tagged teleoperation with explicit procedural rules, learned stopping, and visual verification gates.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop section-narrow">
+      <h2 class="title is-3 has-text-centered">Composition, not capacity, is the bottleneck</h2>
+      <div class="columns is-centered has-text-centered" style="margin-top:1rem;">
+        <div class="column">
+          <div class="stat-number base">27 / 60</div>
+          <div class="stat-label">slots filled<br>strongest end-to-end baseline</div>
+        </div>
+        <div class="column">
+          <div class="stat-number ours">47 / 60</div>
+          <div class="stat-label">slots filled<br><b>SurgeCount</b></div>
+        </div>
+        <div class="column">
+          <div class="stat-number base">3 / 20</div>
+          <div class="stat-label">full procedures<br>strongest end-to-end baseline</div>
+        </div>
+        <div class="column">
+          <div class="stat-number ours">12 / 20</div>
+          <div class="stat-label">full procedures<br><b>SurgeCount</b></div>
+        </div>
+      </div>
+      <p class="has-text-centered content" style="margin-top:1rem;">
+        Trained on the same teleoperation data, end-to-end policies handle individual skills but cannot chain them under protocol. Even &pi;<sub>0.5</sub>, which already predicts hierarchical subtasks, re-issues its prediction every action chunk with no commitment or verification &mdash; it switches its active subtask mid-rollout 18.2 times per trial on average, against 0 for SurgeCount by construction.
+      </p>
+    </div>
+  </section>
+
+  <section class="section hero is-light">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">How SurgeCount works</h2>
+      <div class="columns is-centered">
+        <div class="column is-full has-text-centered">
+          <img src="static/images/architecture.png" alt="SurgeCount system overview" style="max-width:100%; border-radius:8px;"/>
+          <p class="video-caption has-text-centered">
+            <b>System overview.</b> (A) Two SO-101 arms move red-stained gauze from a source tray to a three-slot counting tray, grasping each gauze by its blue radiopaque thread. (B) A subtask-conditioned VLA policy with a learned stop head runs one subtask at a time; at each stop a frozen VLM selects the next subtask under a prompt-encoded protocol FSM, logging every decision. (C) The orchestrator routes between a visible-thread strategy and an occluded-thread left-arm reveal; both converge on placement and verification, with gate failures triggering composed release-and-return recovery.
+          </p>
+        </div>
+      </div>
+
+      <div class="columns is-centered" style="margin-top:1.5rem;">
+        <div class="column is-one-third">
+          <div class="box mechanism-card has-text-centered">
+            <span class="icon is-large has-text-info"><span class="mechanism-symbol" aria-hidden="true">■</span></span>
+            <h3 class="title is-5">1. Learned stop boundaries</h3>
+            <p>A single scalar stop head, supervised from the existing teleoperation segmentation, commits to each subtask so it runs to completion &mdash; instead of being re-decided every action chunk.</p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="box mechanism-card has-text-centered">
+            <span class="icon is-large has-text-info"><span class="mechanism-symbol" aria-hidden="true">↗</span></span>
+            <h3 class="title is-5">2. Stateful VLM orchestrator</h3>
+            <p>At each boundary a frozen VLM selects the next of eleven learned skills under a prompt-encoded protocol with per-skill verification gates &mdash; it never generates actions or invents skills.</p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div class="box mechanism-card has-text-centered">
+            <span class="icon is-large has-text-info"><span class="mechanism-symbol" aria-hidden="true">↶</span></span>
+            <h3 class="title is-5">3. Composed recovery</h3>
+            <p>On a gate failure, recovery composes from release-and-return subtasks already in the training set &mdash; using the existing skill library without a dedicated recovery policy.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section hero is-light">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Two grasp strategies</h2>
+      <p class="content has-text-centered section-narrow">
+        Each gauze carries one blue radiopaque thread &mdash; the only reliable per-sponge isolation landmark. The orchestrator routes between two named happy-path strategies depending on whether that thread is visible.
+      </p>
+      <div class="columns is-centered">
+        <div class="column is-half">
+          <video poster="static/images/posters/strategy_visible.jpg" controls muted loop playsinline preload="metadata" style="width:100%; border-radius:8px;">
+            <source src="static/videos/strategy_visible.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption has-text-centered">
+            <b>Visible thread</b> (right arm only): grasp &rarr; place &rarr; release &rarr; return &nbsp;(<code>1&rarr;2x&rarr;3&rarr;4</code>).
+          </p>
+        </div>
+        <div class="column is-half">
+          <video poster="static/images/posters/strategy_occluded.jpg" controls muted loop playsinline preload="metadata" style="width:100%; border-radius:8px;">
+            <source src="static/videos/strategy_occluded.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption has-text-centered">
+            <b>Occluded thread</b> (bimanual reveal): left arm lifts a neighbor to expose the thread, then right arm grasps &nbsp;(<code>5&rarr;6&rarr;7&rarr;9&rarr;2x&rarr;3&rarr;4</code>).
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Failure &amp; recovery</h2>
+      <p class="content has-text-centered section-narrow">
+        The harness does not make grasping easy &mdash; it makes failed grasps <b>recoverable and auditable</b>. A failure is caught at a verification gate, the arm releases and returns to baseline, and the procedure retries from a fresh visibility assessment rather than propagating the error into the next placement. Below are three distinct recovery cases.
+      </p>
+      <div class="columns is-centered">
+        <div class="column is-one-third">
+          <video poster="static/images/posters/recovery_case1.jpg" controls muted loop playsinline preload="metadata" style="width:100%; border-radius:8px;">
+            <source src="static/videos/recovery_case1.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption has-text-centered">
+            <b>Recovery case 1: protocol violation.</b> The orchestrator detects a non-compliant grasp (gripper closed on the white gauze body, not the blue thread), so it drops and retries &mdash; keeping the count safe and clean.
+          </p>
+        </div>
+        <div class="column is-one-third">
+          <video poster="static/images/posters/recovery_case2.jpg" controls muted loop playsinline preload="metadata" style="width:100%; border-radius:8px;">
+            <source src="static/videos/recovery_case2.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption has-text-centered">
+            <b>Recovery case 2: thread not exposed.</b> After the right-arm grasp, the orchestrator sees the blue thread is still hidden, so the right arm drops the gauze and retries &mdash; iterating until the thread is exposed for the second arm to grab.
+          </p>
+        </div>
+        <div class="column is-one-third">
+          <video poster="static/images/posters/recovery_case3.jpg" controls muted loop playsinline preload="metadata" style="width:100%; border-radius:8px;">
+            <source src="static/videos/recovery_case3.mp4" type="video/mp4">
+          </video>
+          <p class="video-caption has-text-centered">
+            <b>Recovery case 3: strategy switch after a failed grasp.</b> The orchestrator runs the occluded-thread strategy and attempts the exposed-thread grasp (an inherently difficult skill). The grasp fails, but dropping the gauze leaves the blue thread visible &mdash; the orchestrator detects this and switches to the visible-thread strategy, which succeeds.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section hero is-light">
+    <div class="container is-max-desktop section-narrow">
+      <h2 class="title is-3 has-text-centered">A typical end-to-end failure</h2>
+      <p class="content has-text-centered">
+        Trained on the same demonstrations as SurgeCount, end-to-end &pi;<sub>0.5</sub> reactively re-issues its subtask prediction every action chunk &mdash; with no commitment and no verification, it cannot tell when a skill has failed.
+      </p>
+      <video poster="static/images/posters/pi05_failure_mode.jpg" controls muted loop playsinline preload="metadata" style="width:100%; border-radius:8px;">
+        <source src="static/videos/pi05_failure_mode.mp4" type="video/mp4">
+      </video>
+      <p class="video-caption has-text-centered">
+        <b>End-to-end &pi;<sub>0.5</sub>: a failed exposed-thread grasp goes undetected.</b> After the left-arm reveal, &pi;<sub>0.5</sub> attempts the exposed-thread grasp and misses; with no verification gate, it does not register the failure and cannot recover &mdash; the procedure stalls.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop section-narrow">
+      <h2 class="title is-3 has-text-centered">Results</h2>
+
+      <h3 class="title is-5 has-text-centered" style="margin-bottom:0.75rem;">Main comparison (20 trials/method, matched layouts)</h3>
+      <table class="table is-striped is-hoverable surge-table">
+        <thead>
+          <tr><th>Method</th><th class="has-text-centered">Partial-task (slots /60)</th><th class="has-text-centered">Full-task (/20)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>ACT</td><td class="has-text-centered">7 / 60</td><td class="has-text-centered">0 / 20</td></tr>
+          <tr><td>SmolVLA</td><td class="has-text-centered">12 / 60</td><td class="has-text-centered">0 / 20</td></tr>
+          <tr><td>&pi;<sub>0</sub></td><td class="has-text-centered">27 / 60</td><td class="has-text-centered">3 / 20</td></tr>
+          <tr><td>&pi;<sub>0.5</sub> (end-to-end)</td><td class="has-text-centered">15 / 60</td><td class="has-text-centered">2 / 20</td></tr>
+          <tr style="font-weight:700; background:#eaf6ee;"><td>SurgeCount (ours)</td><td class="has-text-centered">47 / 60</td><td class="has-text-centered">12 / 20</td></tr>
+        </tbody>
+      </table>
+      <p class="content has-text-centered" style="font-size:0.9rem;">
+        SurgeCount's slot fill exceeds the strongest baseline, &pi;<sub>0</sub> (Wilcoxon signed-rank, <i>p</i> &lt; 0.01); the procedure-completion gap is significant (McNemar's exact, <i>p</i> &lt; 0.05).
+      </p>
+
+      <h3 class="title is-5 has-text-centered" style="margin-top:2rem; margin-bottom:0.75rem;">Per-attempt diagnostics (surfaced by subtask boundaries)</h3>
+      <table class="table is-striped is-hoverable surge-table">
+        <thead>
+          <tr><th>Subtask group</th><th class="has-text-centered">Accepted / attempts</th><th class="has-text-centered">Rate</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>RA grasp visible thread</td><td class="has-text-centered">37 / 69</td><td class="has-text-centered">53.6%</td></tr>
+          <tr><td>LA reveal (lift white edge)</td><td class="has-text-centered">69 / 88</td><td class="has-text-centered">78.4%</td></tr>
+          <tr><td>RA grasp exposed thread</td><td class="has-text-centered">17 / 52</td><td class="has-text-centered">32.7%</td></tr>
+          <tr><td>RA place in slot I / II / III</td><td class="has-text-centered">50 / 50</td><td class="has-text-centered">100%</td></tr>
+          <tr><td>RA release + return</td><td class="has-text-centered">112 / 112</td><td class="has-text-centered">100%</td></tr>
+          <tr><td>LA release + return</td><td class="has-text-centered">110 / 110</td><td class="has-text-centered">100%</td></tr>
+        </tbody>
+      </table>
+      <p class="content has-text-centered" style="font-size:0.9rem;">
+        Thread grasps are the rate-limiting operation; every downstream skill (placement, release-and-return) succeeds on 100% of attempts once the thread is isolated. Failed grasps are caught at boundaries and retried, not propagated.
+      </p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content">
+            <p>
+              Page layout adapted from the Academic Project Page Template and the Nerfies project page.
+              Layout modifications are shared under Creative Commons Attribution-ShareAlike 4.0 International.
+              <a href="credits.txt">Third-party credits and license notice</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  </main>
+</body>
+</html>

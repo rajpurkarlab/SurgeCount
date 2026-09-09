@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "surgecount"
+version = "0.1.0"
+description = "Data collection, pi0.5 training, and skill composition for bimanual surgical sponge counting"
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+license = {text = "Apache-2.0"}
+dependencies = []
+
+[project.optional-dependencies]
+data = ["numpy>=2.0,<2.3", "pandas>=2.0,<3", "pyarrow>=21,<30", "datasets>=4,<5"]
+train = ["surgecount[data]", "lerobot[training,pi]==0.5.2", "transformers==5.3.0"]
+robot = ["lerobot[core_scripts,feetech,pi]==0.5.2", "transformers==5.3.0", "evdev>=1.7,<2; sys_platform == 'linux'"]
+planner = ["google-genai>=1,<2"]
+dev = ["pytest>=8,<10", "build>=1.2,<2", "ruff>=0.11,<1"]
+
+[project.scripts]
+surgecount-data = "surgecount.data:main"
+surgecount-train = "surgecount.training:main"
+surgecount-record = "surgecount.record:main"
+surgecount-deploy = "surgecount.deploy:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.uv.sources]
+lerobot = {path = "vendor/lerobot", editable = true}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+exclude = ["vendor"]
+
+[tool.ruff.lint]
+select = ["E9", "F"]

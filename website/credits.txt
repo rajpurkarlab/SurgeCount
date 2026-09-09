@@ -1,0 +1,37 @@
+Website layout credits
+
+The page layout is adapted from the Academic Project Page Template, which
+was adapted from the Nerfies project page. This preserves the attribution
+provided with the original page. The layout modifications are distributed
+under Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).
+
+Bulma 0.9.1
+
+Original distribution notice: bulma.io v0.9.1 | MIT License.
+The stylesheet is retained, with its source URL replaced by this local notice.
+
+MIT License
+
+Copyright (c) 2020 Jeremy Thomas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+These credits identify independent third-party layout dependencies, not the
+authors or affiliation of this anonymous submission. Research media are not
+covered by the third-party software licenses above.
