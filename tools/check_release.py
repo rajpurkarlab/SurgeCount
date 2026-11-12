@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit an anonymous source export without network, git, hardware, or ML imports.
+"""Audit a source release without network, git, hardware, or ML imports.
 
 Pass private identifiers with --deny-term; do not store an identity deny list in
 this repository. Automatic checks do not replace visual review of media.
@@ -71,15 +71,23 @@ REQUIRED = {
     "vendor/lerobot/LICENSE",
     "vendor/lerobot/SURGECOUNT_CHANGES.md",
 }
-# These are public dependency providers and attribution repositories, not authors
-# of this submission. Changes to this allowlist require an attribution review.
+# Public dependency providers, workflow actions, and attribution repositories.
+# Project publication links are reviewed separately below.
 UPSTREAM_REPOSITORIES = {
     ("huggingface", "lerobot"),
     ("jgthms", "bulma"),
     ("nerfies", "nerfies.github.io"),
     ("physical-intelligence", "openpi"),
     ("actions", "checkout"),
+    ("actions", "configure-pages"),
+    ("actions", "upload-pages-artifact"),
+    ("actions", "deploy-pages"),
     ("astral-sh", "setup-uv"),
+}
+PUBLIC_PROJECT_REPOSITORIES = {("rajpurkarlab", "surgecount")}
+PUBLIC_PROJECT_URLS = {
+    ("github.com", "/rajpurkarlab/SurgeCount"),
+    ("rajpurkarlab.github.io", "/SurgeCount"),
 }
 HF_NAMESPACES = {"local", "lerobot", "google"}
 LOCAL_NAMESPACES = SOURCE_DIRS | {
@@ -246,6 +254,14 @@ def approved_url(value: str) -> bool:
         host = (parsed.hostname or "").lower()
         if parsed.username or parsed.password:
             return False
+        if (
+            parsed.scheme == "https"
+            and parsed.port is None
+            and not parsed.query
+            and not parsed.fragment
+            and (host, parsed.path.rstrip("/")) in PUBLIC_PROJECT_URLS
+        ):
+            return True
         if host in {"localhost", "127.0.0.1", "::1", "example.com", "example.org", "example.net"} or host.endswith(
             ".invalid"
         ):
@@ -303,7 +319,7 @@ def automatic_issues(text: str, relative: Path) -> list[str]:
         if (
             owner not in HF_NAMESPACES | LOCAL_NAMESPACES
             and not re.fullmatch(r"[0-9.]+", owner)
-            and (owner, repo.lower()) not in UPSTREAM_REPOSITORIES
+            and (owner, repo.lower()) not in UPSTREAM_REPOSITORIES | PUBLIC_PROJECT_REPOSITORIES
         ):
             reasons.append("unapproved dataset/model or account identifier")
             break
@@ -373,7 +389,7 @@ def main(argv=None):
     if issues:
         print("Release check failed:\n" + "\n".join(f"- {item}" for item in issues))
         return 1
-    print("Anonymous release source check passed.")
+    print("Source release check passed.")
     return 0
 
 

@@ -1,9 +1,10 @@
-"""Regression checks for disclosure paths in the static review artifact."""
+"""Regression checks for public and anonymous static website validation."""
 
 from importlib.util import module_from_spec, spec_from_file_location
+from contextlib import redirect_stdout
+import io
 import json
 from pathlib import Path
-import shutil
 import struct
 import subprocess
 import tempfile
@@ -16,43 +17,125 @@ ROOT = Path(__file__).resolve().parents[1]
 SPEC = spec_from_file_location("check_website", ROOT / "tools" / "check_website.py")
 checker = module_from_spec(SPEC)
 SPEC.loader.exec_module(checker)
+RELEASE_SPEC = spec_from_file_location("website_release_check", ROOT / "tools" / "check_release.py")
+release_checker = module_from_spec(RELEASE_SPEC)
+RELEASE_SPEC.loader.exec_module(release_checker)
 
 
 class WebsiteChecks(unittest.TestCase):
     def test_actual_website(self):
-        self.assertEqual(checker.check_site(ROOT / "website"), [])
+        self.assertEqual(checker.check_site(ROOT / "website", public=True), [])
 
-    def fixture(self):
+    def fixture(self, *, public=True):
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
         root = Path(directory.name)
-        shutil.copyfile(ROOT / "website" / "index.html", root / "index.html")
+        authors = checker.PUBLIC_AUTHORS if public else ("Anonymous Authors",)
+        citations = "".join(f'<meta name="citation_author" content="{author}">' for author in authors)
+        label = "ML4H 2026" if public else "Anonymous submission · ML4H 2026"
+        robots = "index, follow" if public else "noindex, nofollow"
+        (root / "index.html").write_text(
+            "<!doctype html><html><head>"
+            f'<meta name="author" content="{"; ".join(authors)}">{citations}'
+            '<meta name="citation_conference_title" content="ML4H 2026">'
+            f'<meta name="robots" content="{robots}">'
+            '<meta name="referrer" content="no-referrer">'
+            '<meta http-equiv="Content-Security-Policy" content="connect-src \'none\'">'
+            f"</head><body><p>{label}</p></body></html>"
+        )
         return root
+
+    def test_public_mode_accepts_repeated_author_tags_and_indexing(self):
+        self.assertEqual(checker.check_site(self.fixture(), public=True), [])
+
+    def test_anonymous_mode_still_accepts_prepared_copy(self):
+        self.assertEqual(checker.check_site(self.fixture(public=False)), [])
+
+    def test_public_page_is_not_an_anonymous_artifact(self):
+        issues = checker.check_site(self.fixture())
+        self.assertTrue(any("metadata is not anonymous" in issue for issue in issues))
+        self.assertTrue(any("noindex" in issue for issue in issues))
+
+    def test_public_mode_requires_every_named_citation_author(self):
+        root = self.fixture()
+        page = root / "index.html"
+        page.write_text(
+            page.read_text().replace(f'<meta name="citation_author" content="{checker.PUBLIC_AUTHORS[0]}">', "")
+        )
+        self.assertTrue(
+            any(
+                "citation_author metadata must include all four" in issue
+                for issue in checker.check_site(root, public=True)
+            )
+        )
+
+    def test_anonymous_mode_checks_every_repeated_author_tag(self):
+        root = self.fixture(public=False)
+        page = root / "index.html"
+        page.write_text(
+            page.read_text().replace(
+                "</head>", f'<meta name="citation_author" content="{checker.PUBLIC_AUTHORS[0]}"></head>'
+            )
+        )
+        self.assertTrue(any("citation_author metadata is not anonymous" in issue for issue in checker.check_site(root)))
+
+    def test_public_label_must_be_visible_and_current(self):
+        root = self.fixture()
+        page = root / "index.html"
+        original = page.read_text()
+        page.write_text(original.replace("<p>ML4H 2026</p>", "<p>Project website</p>"))
+        self.assertTrue(
+            any("public ML4H 2026 label is missing" in issue for issue in checker.check_site(root, public=True))
+        )
+        page.write_text(original.replace("<p>ML4H 2026</p>", "<p>Anonymous submission · ML4H 2026</p>"))
+        self.assertTrue(any("retains an anonymous" in issue for issue in checker.check_site(root, public=True)))
+
+    def test_public_cli_mode_reports_public_check(self):
+        with redirect_stdout(io.StringIO()) as output:
+            result = checker.main(["--root", str(self.fixture()), "--public"])
+        self.assertEqual(result, 0)
+        self.assertIn("PASS: public website", output.getvalue())
 
     def test_identifier_in_comment_is_rejected(self):
         root = self.fixture()
         with (root / "index.html").open("a") as stream:
             stream.write("<!-- private-lab-example -->")
         self.assertTrue(
-            any("private identifier" in item for item in checker.check_site(root, deny_terms=("private-lab-example",)))
+            any(
+                "private identifier" in item
+                for item in checker.check_site(root, public=True, deny_terms=("private-lab-example",))
+            )
         )
 
     def test_remote_source_is_rejected(self):
         root = self.fixture()
         with (root / "index.html").open("a") as stream:
             stream.write('<script src="https://example.invalid/tracker.js"></script>')
-        issues = checker.check_site(root)
+        issues = checker.check_site(root, public=True)
         self.assertTrue(any("external URL" in item for item in issues))
         self.assertTrue(any("nonlocal" in item for item in issues))
 
     def test_missing_asset_is_rejected(self):
-        self.assertTrue(any("missing local target" in item for item in checker.check_site(self.fixture())))
+        root = self.fixture()
+        with (root / "index.html").open("a") as stream:
+            stream.write('<img src="missing.png" alt="Missing image">')
+        self.assertTrue(any("missing local target" in item for item in checker.check_site(root, public=True)))
+
+    def test_public_mode_keeps_path_contact_and_inline_script_guards(self):
+        root = self.fixture()
+        contact = "private-person" + "@" + "example.invalid"
+        with (root / "index.html").open("a") as stream:
+            stream.write(f'<img src="../outside.png" alt="Outside image"><p onclick="alert(1)">{contact}</p>')
+        issues = checker.check_site(root, public=True)
+        self.assertTrue(any("escapes website directory" in item for item in issues))
+        self.assertTrue(any("contact address" in item for item in issues))
+        self.assertTrue(any("inline event handler" in item for item in issues))
 
     def test_download_and_hidden_file_are_rejected(self):
         root = self.fixture()
         (root / "draft.pdf").write_bytes(b"example")
         (root / ".env").write_text("example")
-        issues = checker.check_site(root)
+        issues = checker.check_site(root, public=True)
         self.assertTrue(any("downloadable" in item for item in issues))
         self.assertTrue(any("hidden file" in item for item in issues))
 
@@ -65,6 +148,27 @@ class WebsiteChecks(unittest.TestCase):
                 b"\x89PNG\r\n\x1a\n" + struct.pack(">I", len(payload)) + chunk + struct.pack(">I", zlib.crc32(chunk))
             )
             self.assertIn("PNG metadata chunk tEXt", checker.check_image_metadata(path))
+
+
+class ReviewedPublicationLinks(unittest.TestCase):
+    def test_only_the_reviewed_project_and_pages_urls_are_allowed(self):
+        for url in ("https://github.com/rajpurkarlab/SurgeCount", "https://rajpurkarlab.github.io/SurgeCount/"):
+            with self.subTest(url=url):
+                self.assertTrue(release_checker.approved_url(url))
+        owner = "rajpurkarlab"
+        for url in (
+            "https://" + "github.com/" + owner + "/other-project",
+            "https://" + "github.com/" + owner + "/SurgeCount/blob/main/private.txt",
+            "https://" + owner + ".github.io/other-project/",
+            "https://" + owner + ".github.io/SurgeCount/private/",
+        ):
+            with self.subTest(url=url):
+                self.assertFalse(release_checker.approved_url(url))
+
+    def test_official_pages_actions_are_reviewed_individually(self):
+        for action in ("configure-pages", "upload-pages-artifact", "deploy-pages"):
+            self.assertTrue(release_checker.approved_url("https://" + "github.com/" + "actions/" + action))
+        self.assertFalse(release_checker.approved_url("https://" + "github.com/" + "actions/" + "unreviewed-action"))
 
 
 class VideoMetadataChecks(unittest.TestCase):

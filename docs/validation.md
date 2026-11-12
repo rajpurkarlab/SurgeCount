@@ -28,8 +28,9 @@ Release validation covers offline software, packaging, and website checks.
   weight-loading entry points.
 - First-party lint, release-content scanning, website local-target checks,
   and image/video metadata checks pass. Root and vendored packages build.
-- Anonymity regressions cover account links, personal paths, hidden metadata,
-  binary identifier scans, and exact ZIP membership and neutral metadata.
+- Regression checks for anonymous exports cover account links, personal paths,
+  hidden metadata, binary identifier scans, and exact ZIP membership and
+  neutral metadata.
   Local training placeholders cannot trigger a remote dataset lookup.
   Training requires explicit initialization; missing or incompatible local
   checkpoints fail before ML imports or Hub access. Remote initialization
@@ -59,10 +60,11 @@ inspect local metadata. Historical configuration gaps are recorded in
 
 Visual review covered six frames per clip, all posters, and the architecture
 figure, including its training inset with a partial operator profile.
-Source and media metadata scans checked the complete source archive and
-website for project account identifiers, artifact names, personal paths,
-host addresses, source-history fingerprints, and identifying file metadata.
+For the anonymous export, source and media metadata scans checked the complete
+source archive and website for project account identifiers, artifact names,
+personal paths, host addresses, source-history fingerprints, and identifying
+file metadata.
 The export allowlist defines the distributed files; upstream copyright
-attribution is retained. See [anonymous release notes](anonymity.md).
+attribution is retained. See [anonymous export notes](anonymity.md).
 
 Datasets and checkpoints will be released upon publication.

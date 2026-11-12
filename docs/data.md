@@ -1,6 +1,6 @@
 # Demonstrations and dataset preparation
 
-**Datasets and checkpoints will be released upon publication.** The final dataset contains curated bimanual gauze-handling demonstrations collected by teleoperating two SO-101 arms. The model is conditioned on the instruction for the skill active at each recorded frame. Project account names, repository identifiers, and download links are withheld for anonymous review.
+**Datasets and checkpoints will be released upon publication.** The final dataset contains curated bimanual gauze-handling demonstrations collected by teleoperating two SO-101 arms. The model is conditioned on the instruction for the skill active at each recorded frame.
 
 Compute usable episode IDs and eligible frame counts from the selected local dataset's parquet files. Curation and episode/task filtering determine the training subset.
 
@@ -29,7 +29,7 @@ The canonical task table and camera selection are defined in `src/surgecount/tas
 
 ## Lineage and curation
 
-The collection grew through repeated recording, cleaning, and merging passes. Recordings after the camera replacement around episode 251 formed the later training subset. Historical artifact names are withheld during anonymous review.
+The collection grew through repeated recording, cleaning, and merging passes. Recordings after the camera replacement around episode 251 formed the later training subset.
 
 Cleaning removed corrupted recordings and relabeled unwanted, failed, or superseded skill segments as idle. Later additions retained selected skills; some older demonstrations were subsequently retired. The complete append, deletion, and reindexing manifest remains unavailable. The curated dataset will accompany publication; the tools below prepare independently collected local data.
 

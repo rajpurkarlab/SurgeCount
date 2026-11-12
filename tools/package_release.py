@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create or verify an anonymous ZIP from the exact allowlisted source export."""
+"""Create or verify a source ZIP from the exact allowlisted export."""
 
 from __future__ import annotations
 

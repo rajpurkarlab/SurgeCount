@@ -1,7 +1,7 @@
 # Data and model artifacts
 
-**Datasets and checkpoints will be released upon publication.** This anonymous
-review package provides source code and configurations. Project artifact
+**Datasets and checkpoints will be released upon publication.** This source
+package provides code and configurations. Project artifact
 identifiers and download links will accompany the data and model release.
 
 ## Policy and baseline
@@ -49,7 +49,7 @@ set `deployment.image_keys` to `native` for those checkpoints.
 
 For reproducible runs, record immutable dataset and initialization revisions
 in your private run configuration. Store run manifests and model outputs
-separately from the anonymous source package because they can contain local
+separately from the source package because they can contain local
 paths and artifact identities. The retained deployment launcher selects step
 9,000. Mapping each paper result to its evaluation checkpoint requires the
 original evaluation records; those mappings and historical artifact revisions

@@ -8,16 +8,17 @@ the code and recipe reconstruction. Those records remain private.
 The vendored LeRobot 0.5.2 snapshot includes research modifications and the
 newer workstation recorder, control utilities, Gemini planner, and Linux
 keyboard support. The vendored files define the distributed source tree;
-private source history and commit identifiers are withheld for anonymous
-review. See `vendor/lerobot/SURGECOUNT_CHANGES.md` for the changed components and
-compatibility fixes. Upstream copyright and license notices are retained.
+private source history and historical commit identifiers remain outside the
+source package. See `vendor/lerobot/SURGECOUNT_CHANGES.md` for the changed
+components and compatibility fixes. Upstream copyright and license notices
+are retained.
 
 The public interface consists of standalone configuration-driven commands
 for collection, dataset preparation, training, and deployment. The release
 adds dataset preparation in new copies, filtering by local row position, camera masking,
 strict initialization loading, and offline regression tests. Model weights,
 raw datasets, calibration, home poses, device identities, machine paths,
-API keys, and original chat histories remain outside the anonymous package.
+API keys, and original chat histories remain outside the source package.
 
 ## Experimental interpretation
 

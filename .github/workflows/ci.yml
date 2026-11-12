@@ -26,6 +26,6 @@ jobs:
       - name: Install media metadata checker
         run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
       - name: Check website links and metadata
-        run: uv run --frozen --no-sync python tools/check_website.py --media
+        run: uv run --frozen --no-sync python tools/check_website.py --public --media
       - name: Build Python package
         run: uv build --no-sources

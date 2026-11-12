@@ -9,7 +9,7 @@ Keep the patched, vendored LeRobot package as the installed dependency.
 uv run --no-sync pytest
 uv run --no-sync ruff check src tests tools
 uv run --no-sync python tools/check_release.py
-uv run --no-sync python tools/check_website.py --media
+uv run --no-sync python tools/check_website.py --public --media
 ```
 
 Keep tests independent of physical devices, cloud API calls, downloaded
@@ -19,9 +19,9 @@ camera masks, joint units, and stop semantics consistent across collection,
 training, and deployment. Never commit credentials, local hardware
 configuration, calibration, raw recordings, or model artifacts.
 
-Datasets and checkpoints will be released upon publication. During review,
-keep project accounts, artifact links, personal paths, and identifying commit
-metadata out of contributions. See [anonymous release notes](docs/anonymity.md).
+Datasets and checkpoints will be released upon publication. Keep private
+artifact links, personal paths, and machine addresses out of contributions.
+See [release privacy notes](docs/anonymity.md).
 
 When modifying the vendor package, retain original license notices and
 document the change in `docs/provenance.md`. For robot changes, record the

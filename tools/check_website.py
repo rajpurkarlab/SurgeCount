@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the anonymous static website without making network requests."""
+"""Validate a public or anonymous static website without making network requests."""
 
 from __future__ import annotations
 
@@ -20,6 +20,7 @@ NETWORK_URL = re.compile(r"(?:https?:)?//[^\s\"'<>]+", re.IGNORECASE)
 EMAIL = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.IGNORECASE)
 IP_ADDRESS = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
 OLD_VENUE = re.compile(r"\bCoRL\b|Conference on Robot Learning", re.IGNORECASE)
+PUBLIC_AUTHORS = ("Sungeun Kim", "Xiaoman Zhang", "Xucheng Wang", "Pranav Rajpurkar")
 
 
 class Page(HTMLParser):
@@ -28,10 +29,18 @@ class Page(HTMLParser):
         self.ids: set[str] = set()
         self.references: list[str] = []
         self.meta: dict[str, str] = {}
+        self.meta_values: dict[str, list[str]] = {}
+        self.visible_text: list[str] = []
+        self.in_body = False
+        self.hidden_text_depth = 0
         self.issues: list[str] = []
 
     def handle_starttag(self, tag: str, attributes: list[tuple[str, str | None]]) -> None:
         attrs = dict(attributes)
+        if tag == "body":
+            self.in_body = True
+        if tag in {"script", "style"}:
+            self.hidden_text_depth += 1
         if attrs.get("id"):
             if attrs["id"] in self.ids:
                 self.issues.append(f"duplicate id: {attrs['id']}")
@@ -45,6 +54,7 @@ class Page(HTMLParser):
             name = attrs.get("name") or attrs.get("property") or attrs.get("http-equiv")
             if name:
                 self.meta[name.lower()] = attrs.get("content") or ""
+                self.meta_values.setdefault(name.lower(), []).append(attrs.get("content") or "")
                 if name in {"og:image", "twitter:image", "citation_pdf_url"} and attrs.get("content"):
                     self.references.append(attrs["content"])
         if tag == "video" and "controls" not in attrs:
@@ -55,6 +65,16 @@ class Page(HTMLParser):
             self.issues.append("inline event handler bypasses the self-only script policy")
 
     handle_startendtag = handle_starttag
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "body":
+            self.in_body = False
+        if tag in {"script", "style"}:
+            self.hidden_text_depth = max(0, self.hidden_text_depth - 1)
+
+    def handle_data(self, data: str) -> None:
+        if self.in_body and not self.hidden_text_depth:
+            self.visible_text.append(data)
 
 
 def check_image_metadata(path: Path) -> list[str]:
@@ -135,7 +155,7 @@ def check_video_metadata(path: Path, ffprobe: str) -> list[str]:
     return issues
 
 
-def check_site(root: Path, *, media: bool = False, deny_terms: tuple[str, ...] = ()) -> list[str]:
+def check_site(root: Path, *, public: bool = False, media: bool = False, deny_terms: tuple[str, ...] = ()) -> list[str]:
     root = root.resolve()
     issues: list[str] = []
     if not (root / "index.html").is_file():
@@ -206,15 +226,27 @@ def check_site(root: Path, *, media: bool = False, deny_terms: tuple[str, ...] =
                 if not reference.startswith("data:"):
                     check_reference(path, reference.strip())
     home = pages[root / "index.html"]
-    for key in ("author", "citation_author"):
-        if "anonymous" not in home.meta.get(key, "").lower():
-            issues.append(f"index.html: {key} metadata is not anonymous")
+    if public:
+        for key in ("author", "citation_author"):
+            authors = " ".join(home.meta_values.get(key, [])).casefold()
+            if "anonymous" in authors or any(author.casefold() not in authors for author in PUBLIC_AUTHORS):
+                issues.append(f"index.html: {key} metadata must include all four public authors")
+        visible = " ".join(" ".join(home.visible_text).split())
+        if "ML4H 2026" not in visible:
+            issues.append("index.html: public ML4H 2026 label is missing")
+        if "anonymous submission" in visible.casefold():
+            issues.append("index.html: public page retains an anonymous submission label")
+    else:
+        for key in ("author", "citation_author"):
+            values = home.meta_values.get(key, [])
+            if not values or any("anonymous" not in value.lower() for value in values):
+                issues.append(f"index.html: {key} metadata is not anonymous")
+        if "Anonymous submission · ML4H 2026" not in texts[root / "index.html"]:
+            issues.append("index.html: anonymous ML4H 2026 submission label is missing")
+        if "noindex" not in home.meta.get("robots", ""):
+            issues.append("index.html: noindex metadata is missing")
     if "ML4H" not in home.meta.get("citation_conference_title", ""):
         issues.append("index.html: venue metadata is not ML4H")
-    if "Anonymous submission · ML4H 2026" not in texts[root / "index.html"]:
-        issues.append("index.html: anonymous ML4H 2026 submission label is missing")
-    if "noindex" not in home.meta.get("robots", ""):
-        issues.append("index.html: noindex metadata is missing")
     if home.meta.get("referrer") != "no-referrer":
         issues.append("index.html: no-referrer metadata is missing")
     if "connect-src 'none'" not in home.meta.get("content-security-policy", ""):
@@ -234,18 +266,20 @@ def check_site(root: Path, *, media: bool = False, deny_terms: tuple[str, ...] =
     return issues
 
 
-def main() -> int:
+def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1] / "website")
+    parser.add_argument("--public", action="store_true", help="require named author metadata and the public ML4H label")
     parser.add_argument("--media", action="store_true", help="inspect image metadata and probe all MP4s")
     parser.add_argument("--deny-term", action="append", default=[], help="additional private identifier to reject")
-    args = parser.parse_args()
-    issues = check_site(args.root, media=args.media, deny_terms=tuple(args.deny_term))
+    args = parser.parse_args(argv)
+    issues = check_site(args.root, public=args.public, media=args.media, deny_terms=tuple(args.deny_term))
     if issues:
         for issue in issues:
             print(f"FAIL: {issue}")
         return 1
-    print("PASS: anonymous website source and local targets" + (", image/video metadata" if args.media else ""))
+    mode = "public" if args.public else "anonymous"
+    print(f"PASS: {mode} website source and local targets" + (", image/video metadata" if args.media else ""))
     return 0
 
 

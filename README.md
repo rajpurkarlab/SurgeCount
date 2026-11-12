@@ -4,6 +4,10 @@
 
 Research code for ML4H 2026.
 
+**Sungeun Kim, Xiaoman Zhang, Xucheng Wang, Pranav Rajpurkar**
+
+[Project website](https://rajpurkarlab.github.io/SurgeCount/)
+
 SurgeCount uses two SO-101 arms to move individual surgical sponges from a
 source tray into ordered counting slots. A single language-conditioned policy
 learns eleven skills and a stopping signal alongside twelve robot actions.
@@ -18,7 +22,7 @@ thirteen-dimensional outputs and the separate operator/Gemini composition
 harness. See [models](docs/models.md) for the two interfaces.
 
 This repository contains the data collection, data preparation, training,
-manual deployment, and Gemini composition code, plus an anonymous project
+manual deployment, and Gemini composition code, plus the project
 website. It includes the patched LeRobot source needed by the runtime.
 
 **Datasets and checkpoints will be released upon publication.**
@@ -121,8 +125,8 @@ configs/              Portable recording, training, deployment, and hardware exa
 vendor/lerobot/        Patched LeRobot source, upstream license, change record
 tests/                Offline data, filtering, runtime, and website regressions
 docs/                 Setup, data lineage, models, provenance, and validation
-website/              Self-contained anonymous ML4H project page and demo media
-tools/                Release and anonymous-website checks
+website/              Self-contained ML4H project page and demo media
+tools/                Source release and website checks
 ```
 
 ## Checks
@@ -131,7 +135,7 @@ tools/                Release and anonymous-website checks
 uv run --no-sync pytest
 uv run --no-sync ruff check src tests tools
 uv run --no-sync python tools/check_release.py
-uv run --no-sync python tools/check_website.py --media
+uv run --no-sync python tools/check_website.py --public --media
 ```
 
 CI tests data preparation, filtering, runtime controls, and release artifacts
@@ -140,11 +144,12 @@ validation requirements.
 
 ## Website and licensing
 
-The code and website support anonymous review; see the
-[anonymous release notes](docs/anonymity.md). Serve only `website/` as the
-web artifact. The page uses anonymous attribution and local assets. See
-[website notes](docs/website.md).
+The [project website](https://rajpurkarlab.github.io/SurgeCount/) uses
+the GitHub Pages workflow to publish `website/` from `main`.
+The page includes the authors, system architecture, results, and local
+demonstration videos. See [website notes](docs/website.md) for deployment
+and [release privacy notes](docs/anonymity.md) for source packaging.
 
 First-party code and the LeRobot snapshot use Apache-2.0. The website layout
 and third-party assets have separate terms in [THIRD_PARTY.md](THIRD_PARTY.md).
-Use `CITATION.cff` for the anonymous software citation.
+Use `CITATION.cff` for the software citation.
