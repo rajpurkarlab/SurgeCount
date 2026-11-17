@@ -12,6 +12,6 @@ authors:
   - given-names: "Pranav"
     family-names: "Rajpurkar"
 repository-code: "https://github.com/rajpurkarlab/SurgeCount"
-url: "https://rajpurkarlab.github.io/SurgeCount/"
+url: "https://github.com/rajpurkarlab/SurgeCount"
 version: 0.1.0
 license: Apache-2.0

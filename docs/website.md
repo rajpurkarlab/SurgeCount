@@ -1,36 +1,38 @@
-# Public project page
+# Repository front page and demo media
 
-The static page in `website/` presents SurgeCount for **ML4H 2026**, with the
-system architecture, measured results, and eight demonstration videos. It
-names **Sungeun Kim, Xiaoman Zhang, Xucheng Wang, and Pranav Rajpurkar** in
-the page and author metadata. Styles, JavaScript, images, and videos are local;
-the page uses system fonts.
+The [repository README](../README.md) is SurgeCount's main project page for
+**ML4H 2026**, with the system architecture, measured results, and a visual
+and video gallery. The authors are **Sungeun Kim, Xiaoman Zhang, Xucheng Wang,
+and Pranav Rajpurkar**.
 
-The public source repository is [rajpurkarlab/SurgeCount](https://github.com/rajpurkarlab/SurgeCount),
-and the publication target is [SurgeCount on GitHub Pages](https://rajpurkarlab.github.io/SurgeCount/).
-`.github/workflows/pages.yml` publishes the `website/` directory through
-GitHub Pages. Configure the repository's Pages source as **GitHub Actions**.
-This initial setup requires a repository administrator, maintainer, or a role
-with permission to manage Pages. After setup, run **Deploy project website**
-from the Actions tab on `main`. Later changes to `website/` on `main` deploy
-automatically.
+The canonical project URL is
+[github.com/rajpurkarlab/SurgeCount](https://github.com/rajpurkarlab/SurgeCount).
+The gallery uses repository images and GitHub-hosted video attachments that
+play inline in the README. The attachments are copies of all eight full MP4 files in
+[`website/static/videos/`](../website/static/videos/). Poster images remain
+in [`website/static/images/posters/`](../website/static/images/posters/).
 
 Datasets and checkpoints will be released upon publication.
 
-Preview from the release root:
+## Optional offline page
+
+`website/index.html` provides an optional static copy of the project
+presentation. Its styles, JavaScript, images, and videos are local, and it
+uses system fonts. Preview it from the repository root:
 
 ```bash
 python3 tools/check_website.py --public --media
 python3 -m http.server 8000 --bind 127.0.0.1 --directory website
 ```
 
-Open `http://127.0.0.1:8000/`. Serve `website/` as the complete web artifact.
+Open `http://127.0.0.1:8000/`. This preview serves only the `website/` directory.
 
 ## Content and media
 
-- The four authors and ML4H 2026 venue appear in the page and metadata.
-- All page resources and links resolve locally. Template credit and license
-  attribution appear in the local notice.
+- The README and static page identify the four authors and ML4H 2026 venue.
+- Static-page resources and links resolve locally. Template credit and
+  license attribution appear in the local notice; repository media terms
+  are recorded in [THIRD_PARTY.md](../THIRD_PARTY.md).
 - Each MP4 contains a single video stream with neutral container metadata.
   Remuxing preserves the encoded video and removes audio, data/timecode
   tracks, chapters, and descriptive metadata. Images have EXIF, XMP, and
@@ -53,7 +55,7 @@ downloads. Referrer and content-security policies remain required. Text
 inside comments is included in the scan. Optional `--deny-term` arguments
 check additional private identifiers supplied at invocation time.
 
-CI validates the current page in public mode. The default anonymous mode
+CI validates the optional static page in public mode. The default anonymous mode
 remains available for a separately prepared anonymous copy; see
 [anonymous review copies](anonymity.md). The current named page is a public
 artifact.
@@ -68,5 +70,5 @@ original sources additionally requires `ffmpeg` and Pillow.
 python3 -m unittest discover -s tests -p 'test_website.py'
 ```
 
-Visually inspect replacement media and rerun the checks before publishing.
-The public page's robots metadata and `robots.txt` permit indexing.
+Visually inspect replacement media and rerun the checks before adding it to
+the repository gallery or optional static page.

@@ -6,13 +6,108 @@ Research code for ML4H 2026.
 
 **Sungeun Kim, Xiaoman Zhang, Xucheng Wang, Pranav Rajpurkar**
 
-[Project website](https://rajpurkarlab.github.io/SurgeCount/)
-
 SurgeCount uses two SO-101 arms to move individual surgical sponges from a
 source tray into ordered counting slots. A single language-conditioned policy
 learns eleven skills and a stopping signal alongside twelve robot actions.
 An operator or a stateful vision-language planner chooses the next skill at
 each boundary.
+
+[Demonstrations](#demonstrations) · [System overview](#system-overview) ·
+[Results](#results) · [Installation](#installation) · [Quick start](#quick-start)
+
+**Datasets and checkpoints will be released upon publication.**
+
+## Demonstrations
+
+Two complete procedures: SurgeCount counts three gauzes into the ordered
+tray, grasps each by its blue radiopaque thread, verifies placements, and
+recovers from failed grasps. Play the videos directly below.
+All eight original clips are also available in the [MP4 folder](website/static/videos/).
+
+### Full procedure 1
+
+https://github.com/user-attachments/assets/b9a7de95-ba37-46f3-bf13-eddd0e51d600
+
+### Full procedure 2
+
+https://github.com/user-attachments/assets/4c6ca2b3-2bc2-4d38-8cc3-c59e398dc8f8
+
+## System overview
+
+![SurgeCount architecture: bimanual robot setup, language-conditioned skill policy, learned stop boundaries, and VLM orchestration with visual verification and recovery.](website/static/images/architecture.png)
+
+1. **Learned stop boundaries.** The policy predicts twelve robot actions and
+   a stop signal, keeping the selected skill active until its stopping boundary.
+2. **Stateful orchestration.** At each boundary, a frozen Gemini VLM selects
+   the next skill under a prompt-encoded protocol with visual verification gates.
+3. **Composed recovery.** Failed grasps trigger learned release-and-return
+   skills before the orchestrator selects the next attempt.
+
+## Results
+
+Across **100 real-robot trials**—five methods evaluated on the same 20 layouts—
+SurgeCount fills **47 of 60 slots** and completes **12 of 20 procedures**.
+
+| Method | Slots filled / 60 | Complete procedures / 20 |
+| --- | ---: | ---: |
+| ACT | 7 | 0 |
+| SmolVLA | 12 | 0 |
+| π₀ | 27 | 3 |
+| π₀.₅ (end-to-end) | 15 | 2 |
+| **SurgeCount** | **47** | **12** |
+
+Compared with the strongest baseline, π₀, the slot-fill difference is
+significant by a Wilcoxon signed-rank test (*p* < 0.01), and the procedure
+completion difference by McNemar's exact test (*p* < 0.05).
+
+## Grasp strategies
+
+### Visible thread
+
+The right arm grasps the blue thread, places the gauze into the next slot,
+releases it, and returns to rest.
+
+https://github.com/user-attachments/assets/0ce8313a-d1e7-41d6-9a67-e2e36433a5f5
+
+### Occluded thread
+
+The left arm lifts a neighboring gauze to expose the blue thread. The right
+arm then grasps the exposed thread and places the gauze into the counting tray.
+
+https://github.com/user-attachments/assets/e914b74e-81a2-4f69-a3b5-4160686d0074
+
+## Failure and recovery
+
+### Recovery 1: grasping the gauze body
+
+The orchestrator detects a grasp on the white gauze body, releases the gauze,
+and retries the required blue-thread grasp.
+
+https://github.com/user-attachments/assets/65a21152-db8e-48ad-853b-d72a0c97b7c6
+
+### Recovery 2: the thread remains hidden
+
+After the right-arm grasp, the orchestrator sees that the blue thread remains
+hidden. The arm releases the gauze and retries thread exposure.
+
+https://github.com/user-attachments/assets/aaf2ae76-1c7b-457f-9624-ae0af8925cd7
+
+### Recovery 3: switching strategies
+
+An exposed-thread grasp fails during the occluded-thread strategy. Releasing
+the gauze leaves its blue thread visible, and the orchestrator switches to
+the visible-thread strategy, which succeeds in this trial.
+
+https://github.com/user-attachments/assets/ac7c6868-0d74-452a-a7a0-4aa8aaf3b987
+
+### End-to-end baseline: missed grasp
+
+After the left-arm reveal, the end-to-end π₀.₅ baseline misses the exposed
+thread and the procedure stalls.
+
+https://github.com/user-attachments/assets/dd56678a-9e3a-4071-a1fc-c00b21ec7c90
+
+## Code overview
 
 The end-to-end pi0.5 baseline is implemented from pi0 with a trained subtask
 predictor, following the original pi0.5 paper (arXiv:2504.16054). At each action
@@ -22,10 +117,9 @@ thirteen-dimensional outputs and the separate operator/Gemini composition
 harness. See [models](docs/models.md) for the two interfaces.
 
 This repository contains the data collection, data preparation, training,
-manual deployment, and Gemini composition code, plus the project
-website. It includes the patched LeRobot source needed by the runtime.
-
-**Datasets and checkpoints will be released upon publication.**
+manual deployment, and Gemini composition code, plus the figures and
+demonstration videos shown above. It includes the patched LeRobot source
+needed by the runtime.
 
 The local examples support independently collected data and compatible
 checkpoints.
@@ -125,7 +219,7 @@ configs/              Portable recording, training, deployment, and hardware exa
 vendor/lerobot/        Patched LeRobot source, upstream license, change record
 tests/                Offline data, filtering, runtime, and website regressions
 docs/                 Setup, data lineage, models, provenance, and validation
-website/              Self-contained ML4H project page and demo media
+website/              Architecture figure, demo videos, and optional offline HTML page
 tools/                Source release and website checks
 ```
 
@@ -142,13 +236,13 @@ CI tests data preparation, filtering, runtime controls, and release artifacts
 offline. See [validation](docs/validation.md) for test coverage and hardware
 validation requirements.
 
-## Website and licensing
+## Media and licensing
 
-The [project website](https://rajpurkarlab.github.io/SurgeCount/) uses
-the GitHub Pages workflow to publish `website/` from `main`.
-The page includes the authors, system architecture, results, and local
-demonstration videos. See [website notes](docs/website.md) for deployment
-and [release privacy notes](docs/anonymity.md) for source packaging.
+This README is the project page. The architecture figure and eight full
+demonstration videos are included in the repository, and the videos play
+inline on GitHub. See [media notes](docs/website.md) for the source files and
+optional offline HTML page, and [release privacy notes](docs/anonymity.md)
+for source packaging.
 
 First-party code and the LeRobot snapshot use Apache-2.0. The website layout
 and third-party assets have separate terms in [THIRD_PARTY.md](THIRD_PARTY.md).

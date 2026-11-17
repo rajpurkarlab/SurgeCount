@@ -1,8 +1,10 @@
 # Public source and anonymous review copies
 
-The current source repository and GitHub Pages website identify the project
-and its authors.
-The named page is described in [website.md](website.md).
+The repository README is the public project page and identifies SurgeCount
+and its authors: Sungeun Kim, Xiaoman Zhang, Xucheng Wang, and Pranav Rajpurkar.
+Its visual and video gallery uses repository media, including the full MP4s
+in `website/static/videos/`. The optional static HTML copy is described in
+[website.md](website.md).
 
 **Datasets and checkpoints will be released upon publication.** Training
 examples continue to use local artifact placeholders. Credentials, private
@@ -19,9 +21,9 @@ python3 tools/check_website.py --public --media
 ```
 
 These checks preserve credential, private-path, runtime-artifact, and
-media-container guards. The reviewed publication links include the exact
-project repository, the project Pages URL, and the official Pages workflow
-actions. A passing source check validates release contents; anonymous review
+media-container guards. The canonical project destination is
+[rajpurkarlab/SurgeCount](https://github.com/rajpurkarlab/SurgeCount).
+A passing source check validates release contents; anonymous review
 requires the separate preparation below.
 
 ## Prepare an anonymous review copy
@@ -42,7 +44,8 @@ python3 tools/check_website.py --root /path/to/anonymous-copy/website --media \
 
 Omitting `--public` selects anonymous website checks. Supply private search
 terms at invocation time rather than recording a private deny list in source.
-Inspect the rendered page and replacement media as well as the scan results.
+Inspect the rendered README, optional static page, and replacement media as
+well as the scan results.
 
 The source ZIP utility exports a prepared tree with relative paths and
 neutral archive metadata. It excludes Git history, environments, runtime

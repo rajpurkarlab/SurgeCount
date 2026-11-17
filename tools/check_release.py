@@ -79,15 +79,22 @@ UPSTREAM_REPOSITORIES = {
     ("nerfies", "nerfies.github.io"),
     ("physical-intelligence", "openpi"),
     ("actions", "checkout"),
-    ("actions", "configure-pages"),
-    ("actions", "upload-pages-artifact"),
-    ("actions", "deploy-pages"),
     ("astral-sh", "setup-uv"),
 }
 PUBLIC_PROJECT_REPOSITORIES = {("rajpurkarlab", "surgecount")}
 PUBLIC_PROJECT_URLS = {
     ("github.com", "/rajpurkarlab/SurgeCount"),
-    ("rajpurkarlab.github.io", "/SurgeCount"),
+}
+# Reviewed video uploads used by the project README; other attachments need review.
+PUBLIC_MEDIA_ASSETS = {
+    "/user-attachments/assets/b9a7de95-ba37-46f3-bf13-eddd0e51d600",
+    "/user-attachments/assets/4c6ca2b3-2bc2-4d38-8cc3-c59e398dc8f8",
+    "/user-attachments/assets/0ce8313a-d1e7-41d6-9a67-e2e36433a5f5",
+    "/user-attachments/assets/e914b74e-81a2-4f69-a3b5-4160686d0074",
+    "/user-attachments/assets/65a21152-db8e-48ad-853b-d72a0c97b7c6",
+    "/user-attachments/assets/aaf2ae76-1c7b-457f-9624-ae0af8925cd7",
+    "/user-attachments/assets/ac7c6868-0d74-452a-a7a0-4aa8aaf3b987",
+    "/user-attachments/assets/dd56678a-9e3a-4071-a1fc-c00b21ec7c90",
 }
 HF_NAMESPACES = {"local", "lerobot", "google"}
 LOCAL_NAMESPACES = SOURCE_DIRS | {
@@ -259,7 +266,10 @@ def approved_url(value: str) -> bool:
             and parsed.port is None
             and not parsed.query
             and not parsed.fragment
-            and (host, parsed.path.rstrip("/")) in PUBLIC_PROJECT_URLS
+            and (
+                (host, parsed.path.rstrip("/")) in PUBLIC_PROJECT_URLS
+                or (host == "github.com" and parsed.path in PUBLIC_MEDIA_ASSETS)
+            )
         ):
             return True
         if host in {"localhost", "127.0.0.1", "::1", "example.com", "example.org", "example.net"} or host.endswith(

@@ -151,24 +151,64 @@ class WebsiteChecks(unittest.TestCase):
 
 
 class ReviewedPublicationLinks(unittest.TestCase):
-    def test_only_the_reviewed_project_and_pages_urls_are_allowed(self):
-        for url in ("https://github.com/rajpurkarlab/SurgeCount", "https://rajpurkarlab.github.io/SurgeCount/"):
-            with self.subTest(url=url):
-                self.assertTrue(release_checker.approved_url(url))
+    def test_only_the_reviewed_project_url_is_allowed(self):
+        self.assertTrue(release_checker.approved_url("https://github.com/rajpurkarlab/SurgeCount"))
         owner = "rajpurkarlab"
         for url in (
             "https://" + "github.com/" + owner + "/other-project",
             "https://" + "github.com/" + owner + "/SurgeCount/blob/main/private.txt",
+            "https://" + owner + ".github.io/SurgeCount/",
             "https://" + owner + ".github.io/other-project/",
             "https://" + owner + ".github.io/SurgeCount/private/",
         ):
             with self.subTest(url=url):
                 self.assertFalse(release_checker.approved_url(url))
 
-    def test_official_pages_actions_are_reviewed_individually(self):
-        for action in ("configure-pages", "upload-pages-artifact", "deploy-pages"):
-            self.assertTrue(release_checker.approved_url("https://" + "github.com/" + "actions/" + action))
-        self.assertFalse(release_checker.approved_url("https://" + "github.com/" + "actions/" + "unreviewed-action"))
+    def test_unused_pages_actions_are_not_allowlisted(self):
+        self.assertTrue(release_checker.approved_url("https://github.com/actions/checkout"))
+        for action in ("configure-pages", "upload-pages-artifact", "deploy-pages", "unreviewed-action"):
+            with self.subTest(action=action):
+                self.assertFalse(release_checker.approved_url("https://" + "github.com/" + "actions/" + action))
+
+    def test_all_eight_reviewed_video_uploads_are_allowed(self):
+        assets = (
+            "b9a7de95-ba37-46f3-bf13-eddd0e51d600",
+            "4c6ca2b3-2bc2-4d38-8cc3-c59e398dc8f8",
+            "0ce8313a-d1e7-41d6-9a67-e2e36433a5f5",
+            "e914b74e-81a2-4f69-a3b5-4160686d0074",
+            "65a21152-db8e-48ad-853b-d72a0c97b7c6",
+            "aaf2ae76-1c7b-457f-9624-ae0af8925cd7",
+            "ac7c6868-0d74-452a-a7a0-4aa8aaf3b987",
+            "dd56678a-9e3a-4071-a1fc-c00b21ec7c90",
+        )
+        self.assertEqual(len(release_checker.PUBLIC_MEDIA_ASSETS), len(assets))
+        for asset in assets:
+            with self.subTest(asset=asset):
+                url = "https://" + "github.com/user-attachments/assets/" + asset
+                self.assertTrue(release_checker.approved_url(url))
+                self.assertEqual(release_checker.automatic_issues(url, Path("README.md")), [])
+
+    def test_reviewed_video_upload_permission_is_exact(self):
+        path = "/user-attachments/assets/" + "b9a7de95-ba37-46f3-bf13-eddd0e51d600"
+        url = "https://" + "github.com" + path
+        for rejected in (
+            "https://" + "github.com/user-attachments/assets/" + "00000000-0000-0000-0000-000000000000",
+            url + "/",
+            url + "/private",
+            url + "?download=1",
+            url + "#fragment",
+            "http://" + "github.com" + path,
+            "https://" + "github.com:443" + path,
+            "https://" + "www.github.com" + path,
+            "https://" + "raw.githubusercontent.com" + path,
+            "https://" + "user" + "@" + "github.com" + path,
+        ):
+            with self.subTest(url=rejected):
+                self.assertFalse(release_checker.approved_url(rejected))
+                self.assertIn(
+                    "unapproved external account or URL",
+                    release_checker.automatic_issues(rejected, Path("README.md")),
+                )
 
 
 class VideoMetadataChecks(unittest.TestCase):
